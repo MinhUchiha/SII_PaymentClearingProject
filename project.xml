@@ -1,0 +1,18 @@
+<project info="SuiteCloud IDE generated file, do not edit." setAttributesOnUpdate="false">
+  <folder name="SII_PaymentClearingProject" bundleable="false">
+    <folder name="ClientScript" bundleable="false">
+      <file name="SII_CS_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_CS_PaymentManagement.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+    </folder>
+    <folder name="Schedule" bundleable="false"/>
+    <folder name="Suitelet" bundleable="false">
+      <file name="SII_SL_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_SL_PaymentAdjustment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_SL_PaymentManagement.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+    </folder>
+    <folder name="UserEvent" bundleable="false">
+      <file name="SII_UE_Custpayment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_UE_Custpayment_Head.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+    </folder>
+  </folder>
+</project>
