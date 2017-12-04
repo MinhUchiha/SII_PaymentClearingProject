@@ -77,10 +77,15 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 				}else{
 				    var fileId = fileObj.save();
 					var recCustpaymentHeadId = createCustomRecord(arrData,fileObj.name);
-					redirect.toRecord({
+					redirect.toSuitelet({
+						scriptId: 'customscript_sii_sl_paymentmanagement' ,
+						deploymentId: 'customdeploy_sii_sl_paymentmanagement',
+						parameters: {'custscript_custpayment_head_id': recCustpaymentHeadId}
+					});
+					/*redirect.toRecord({
 						type : 'customrecord_sii_custpayment_h',
 					  	id : recCustpaymentHeadId
-					});
+					});*/
 				}
 				var scriptObj = runtime.getCurrentScript();
 				log.debug("Remaining governance units: " + scriptObj.getRemainingUsage());  

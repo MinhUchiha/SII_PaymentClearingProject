@@ -86,7 +86,7 @@ function(serverWidget, http, record, search, redirect, format) {
                 text_customer.defaultValue = customer;
                 text_customer.label = '';
                 text_customer.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
                 text_customer.updateLayoutType({
@@ -139,7 +139,7 @@ function(serverWidget, http, record, search, redirect, format) {
                     label: '~',
                     type: serverWidget.FieldType.TEXT
                 });
-                paymentSpace.defaultValue = '~';
+                paymentSpace.defaultValue = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
                 paymentSpace.label = '';
                 paymentSpace.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -148,7 +148,7 @@ function(serverWidget, http, record, search, redirect, format) {
                     layoutType: serverWidget.FieldLayoutType.OUTSIDE                    
                 });
                 paymentSpace.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
+                    breakType: serverWidget.FieldBreakType.STARTROW
                 });
                 
                 var dueDateTo = form.addField({
@@ -174,7 +174,7 @@ function(serverWidget, http, record, search, redirect, format) {
                     label: 'éËêîóø : ',
                     type: serverWidget.FieldType.TEXT
                 });
-                fee_label.defaultValue = "<span style='margin-left: 190px'>éËêîóø</span>";
+                fee_label.defaultValue = "<span style='margin-left: 500px'>éËêîóø</span>";
                 fee_label.label = '';
                 fee_label.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -227,10 +227,10 @@ function(serverWidget, http, record, search, redirect, format) {
                     type: serverWidget.FieldType.TEXT
                 });
         
-                total_text.defaultValue = "<span style='float: left; width: 918px;'>"+paymentamo+"</span>";
+                total_text.defaultValue = paymentamo;
                 total_text.label = '';
                 total_text.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
                 total_text.updateLayoutType({
@@ -252,7 +252,7 @@ function(serverWidget, http, record, search, redirect, format) {
                     label: 'åvéZåÎç∑ : ',
                     type: serverWidget.FieldType.TEXT
                 });
-                calculation_error_label.defaultValue = "<span style='margin-left: -325px'>åvéZåÎç∑</span>";
+                calculation_error_label.defaultValue = "<span style='margin-left: 565px'>åvéZåÎç∑</span>";
                 calculation_error_label.label = '';
                 calculation_error_label.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -268,7 +268,7 @@ function(serverWidget, http, record, search, redirect, format) {
                         type : serverWidget.FieldType.TEXT,
                         label : 'åvéZåÎç∑'
                         });
-                calculation_error.defaultValue = "<span style='margin-left: -285px'>-1</span>";
+                calculation_error.defaultValue = "-1";
                 calculation_error.label = '';
                 calculation_error.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE

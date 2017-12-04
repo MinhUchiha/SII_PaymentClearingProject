@@ -157,18 +157,80 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 });
                 feeField.isDisabled = false;
             }
-            var paymentRecord = record.load({
-                type: 'customrecord_sii_custpayment',
-                id: id,
-                isDynamic: true
-            });
-            paymentRecord.setValue({
-                fieldId: 'custrecord_sii_custpayment_exclusion',
-                value: check
-            });
-            paymentRecord.save();
         }else{
+            var fieldId = scriptContext.fieldId;
+            if(fieldId == 'paymentdatefrom' || fieldId == 'paymentdateto'){
+                var numLines = currentRecord.getLineCount({
+                    sublistId: 'payment_sub_list'
+                });
+                var formDate = currentRecord.getValue({
+                    fieldId: 'paymentdatefrom'
+                });
+                var toDate = currentRecord.getValue({
+                    fieldId: 'paymentdateto'
+                });
+                totalvalue = 0;
+                for (i = 0; i < numLines; i++) {
+                    var paymentDate = currentRecord.getSublistValue({ 
+                        sublistId: 'payment_sub_list',
+                        fieldId : 'sub_list_4',
+                        line : i 
+                    });
+                    var paymentDate = currentRecord.getSublistValue({ 
+                        sublistId: 'payment_sub_list',
+                        fieldId : 'sub_list_4',
+                        line : i 
+                    });
+                    var amount = currentRecord.getSublistValue({
+                        sublistId: 'payment_sub_list',
+                        fieldId: 'sub_list_8',
+                        line: i
+                    });
+                    if(checkDate(paymentDate, formDate, toDate)){
+                        totalvalue += amount
+                    }
+                }
+                totalvalue = format.format({
+                    value: totalvalue,
+                    type: format.Type.INTEGER
+                });
+                currentRecord.setValue({
+                    fieldId: 'texttotal',
+                    value: totalvalue
+                });
+            }
+        }
+    }
 
+    function checkDate(paymentDate, fromDate, toDate){
+        if(fromDate != null && fromDate != ''){
+            if(toDate != null && toDate != ''){
+                if(paymentDate >= fromDate && paymentDate <= toDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if(paymentDate >= fromDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else{
+            if(toDate != null && toDate != ''){
+                if(paymentDate <= toDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if(paymentDate >= fromDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
         }
     }
 

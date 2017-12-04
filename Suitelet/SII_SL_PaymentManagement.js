@@ -28,10 +28,10 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     isDynamic: true
                 });
                 var importDate = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_importdate'});
-                importDate = format.format({
+                /*importDate = format.format({
                     value: importDate,
                     type: format.Type.DATE
-                });
+                });*/
                 var importPerson = objRecord.getText({fieldId: 'custrecord_sii_custpayment_importperson'});
                 var fromDate = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_date_from'});
                 var toDate = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_date_to'});
@@ -101,12 +101,12 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 var textNowDate = form.addField({
                     id: 'textdate',
                     label: 'Date',
-                    type: serverWidget.FieldType.TEXT
+                    type: serverWidget.FieldType.DATE
                 });
-                textNowDate.defaultValue = "<span style='float: left; width: 500px;'>"+importDate+"</span>";
+                textNowDate.defaultValue = importDate;
                 textNowDate.label = '';
                 textNowDate.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
                 textNowDate.updateLayoutType({
@@ -116,48 +116,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 textNowDate.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTCOL
                 });
-                
-                
-                //éÊçûíSìñé“
-                var labelUser = form.addField({
-                    id: 'labeluser',
-                    label: 'éÊçûíSìñé“ : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                
-                labelUser.defaultValue = "éÊçûíSìñé“ : ";
-                labelUser.label = '';
-                labelUser.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                labelUser.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                labelUser.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-
-                var textUser = form.addField({
-                    id: 'textuser',
-                    label: 'ìcà‰ó«ím',
-                    type: serverWidget.FieldType.TEXT
-                });
-                textUser.defaultValue = importPerson;
-                textUser.label = '';
-                textUser.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                
-                textUser.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textUser.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                
+                                          
                 //ì¸ã‡ì˙
                 var paymentDate = form.addField({
                     id: 'paymentdate',
@@ -194,13 +153,52 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 paymentDateFrom.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTCOL
                 });
+
+                //éÊçûíSìñé“
+                var labelUser = form.addField({
+                    id: 'labeluser',
+                    label: 'éÊçûíSìñé“ : ',
+                    type: serverWidget.FieldType.TEXT
+                });
+                
+                labelUser.defaultValue = "<span style='margin-left: 300px'>éÊçûíSìñé“&nbsp;&nbsp;&nbsp;:</span>";
+                labelUser.label = '';
+                labelUser.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.INLINE
+                });
+                labelUser.updateLayoutType({
+                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
+                    
+                });
+                labelUser.updateBreakType({
+                    breakType: serverWidget.FieldBreakType.STARTCOL
+                });
+
+                var textUser = form.addField({
+                    id: 'textuser',
+                    label: 'ìcà‰ó«ím',
+                    type: serverWidget.FieldType.TEXT
+                });
+                textUser.defaultValue = importPerson;
+                textUser.label = '';
+                textUser.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.INLINE
+                });
+                
+                textUser.updateLayoutType({
+                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
+                    
+                });
+                textUser.updateBreakType({
+                    breakType: serverWidget.FieldBreakType.STARTCOL
+                });
                 
                 var paymentSpace = form.addField({
                     id: 'paymentspace',
                     label: '~',
                     type: serverWidget.FieldType.TEXT
                 });
-                paymentSpace.defaultValue = "<span style='margin-right: 30px'>~</span>";
+                paymentSpace.defaultValue = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
                 paymentSpace.label = '';
                 paymentSpace.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -209,7 +207,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     layoutType: serverWidget.FieldLayoutType.OUTSIDE                    
                 });
                 paymentSpace.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
+                    breakType: serverWidget.FieldBreakType.STARTROW
                 });
                 
                 var paymentDateTo = form.addField({
@@ -236,7 +234,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.TEXT
                 });
                 
-                labelNumber.defaultValue = "<span style='margin-left: 52px'>éÊçûåèêî&nbsp;&nbsp;&nbsp;:</span>";
+                labelNumber.defaultValue = "<span style='margin-left: 300px'>éÊçûåèêî&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>";
                 labelNumber.label = '';
                 labelNumber.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -294,13 +292,13 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.TEXT
                 });
                 if(status == 2){
-                    textStatus.defaultValue = "<span style='float: left; width: 500px;'>éÊçûé∏îs</span>";
+                    textStatus.defaultValue = "éÊçûé∏îs";
                 }else{
-                    textStatus.defaultValue = "<span style='float: left; width: 500px;'>ê≥èÌéÊçû</span>";
+                    textStatus.defaultValue = "ê≥èÌéÊçû";
                 }
                 textStatus.label = '';
                 textStatus.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
                 textStatus.updateLayoutType({
@@ -319,7 +317,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.TEXT
                 });
                 
-                labelTotal.defaultValue = "çáåvã‡äz &nbsp;&nbsp;: ";
+                labelTotal.defaultValue = "<span style='margin-left: 365px'>çáåvã‡äz&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>";
                 labelTotal.label = '';
                 labelTotal.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.INLINE
@@ -452,6 +450,13 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.CHECKBOX,
                     label: 'éËêîóø'
                 });
+                paymentSubList.addField({
+                    id: 'sub_list_13',
+                    type: serverWidget.FieldType.TEXT,
+                    label: 'ç∑äzí≤êÆèÓïÒäiî[ÉGÉäÉA'
+                }).updateDisplayType({
+                    displayType : serverWidget.FieldDisplayType.HIDDEN
+                });
                 var i = 0;
                 var totalamount = 0;
                 var resultSet = getPaymentList(recordId)
@@ -469,10 +474,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     });
                     var paymentdate = result.getValue({
                         name: 'custrecord_sii_custpayment_paymentdate'
-                    });
-                    paymentdate = format.format({
-                        value: paymentdate,
-                        type: format.Type.DATE
                     });
                     var bank = result.getValue({
                         name: 'custrecord_sii_custpayment_bank'
@@ -515,8 +516,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             line: i,
                             value: 'F'
                         });
-                        totalamount += parseInt(paymentamo);
+                        if(checkDate(paymentdate, fromDate, toDate)){
+                            totalamount += parseInt(paymentamo);
+                        }
                     }
+                    /*paymentdate = format.format({
+                        value: paymentdate,
+                        type: format.Type.DATE
+                    });*/
                     var output = url.resolveScript({
                         scriptId: 'customscript_sii_sl_paymentadjustment',
                         deploymentId: 'customdeploy_sii_sl_paymentadjustment',
@@ -675,10 +682,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.SELECT,
                     container: 'commission'
                 });
-                fee_account_item.addSelectOption({
-                    value: 1,
-                    text: 'éxï•éËêîóø'
-                });
                     
                 fee_account_item.label = '';
 
@@ -715,10 +718,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     label: 'tax_code',
                     type: serverWidget.FieldType.SELECT,
                     container: 'commission'
-                });
-                tax_code.addSelectOption({
-                    value: 1,
-                    text: '8%'
                 });
                     
                 tax_code.label = '';
@@ -757,10 +756,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.SELECT,
                     container: 'commission'
                 });
-                tax_category.addSelectOption({
-                    value: 1,
-                    text: 'ã§í ëŒâû'
-                });
                     
                 tax_category.label = '';
 
@@ -772,7 +767,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 tax_category.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTCOL
                 });
-                
+
                 //åÎç∑ëŒâû
                 var errorSubtab = form.addSubtab({
                     id : 'error_subtab',
@@ -843,10 +838,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.SELECT,
                     container: 'error_subtab'
                 });
-                plus_error.addSelectOption({
-                    value: 1,
-                    text: 'éGé˚'
-                });
                     
                 plus_error.label = '';
 
@@ -884,10 +875,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.SELECT,
                     container: 'error_subtab'
                 });
-                minus_error.addSelectOption({
-                    value: 1,
-                    text: 'éGëπ'
-                });
                     
                 minus_error.label = '';
 
@@ -899,6 +886,101 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 minus_error.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTCOL
                 });
+                var settingList = getSetting();
+                var setting = settingList.getRange({
+                    start: 0,
+                    end: 1
+                })[0];
+                settingList.each(function(result){
+                    acc = result.getText({name: 'custrecord_sii_custpayment_setting_acc'});
+                    taxco = result.getText({name: 'custrecord_sii_custpayment_setting_taxco'});
+                    taxca = result.getText({name: 'custrecord_sii_custpayment_setting_taxca'});
+                    error = result.getValue({name: 'custrecord_sii_custpayment_setting_error'});
+                    plus = result.getText({name: 'custrecord_sii_custpayment_setting_plus'});
+                    minus = result.getText({name: 'custrecord_sii_custpayment_setting_minus'});
+                    fee_account_item.addSelectOption({
+                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_acc'}),
+                        text : acc
+                    });
+                    /*tax_code.addSelectOption({
+                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_taxco'}),
+                        text : taxco
+                    });*/
+                    /*tax_category.addSelectOption({
+                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_taxca'}),
+                        text : taxca
+                    });*/
+                    error_difference.defaultValue = error;
+                    plus_error.addSelectOption({
+                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_plus'}),
+                        text : plus
+                    });
+                    minus_error.addSelectOption({
+                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_minus'}),
+                        text : minus
+                    });
+                    return true;
+                })
+                var salesTaxItem = getSalesTaxItem();
+                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'})
+                salesTaxItem.each(function(result){
+                    if(result.id == taxCaSetting){
+                        tax_code.addSelectOption({
+                            value : result.id,
+                            text : result.getValue({name: 'itemid'}),
+                            isSelected: true
+                        });
+                    }else{
+                        tax_code.addSelectOption({
+                            value : result.id,
+                            text : result.getValue({name: 'itemid'})
+                        });
+                    }
+                    return true;
+                });
+                var taxCaList = getTaxCa();
+                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'})
+                taxCaList.each(function(result){
+                    if(result.id == taxCaSetting){
+                        tax_category.addSelectOption({
+                            value : result.id,
+                            text : result.getValue({name: 'name'}),
+                            isSelected: true
+                        });
+                    }else{
+                        taxca = result.getValue({name: 'name'});
+                        tax_category.addSelectOption({
+                            value : result.id,
+                            text : taxca
+                        });
+                    }
+                    return true;
+                });
+                var accoutlist = getAccount();
+                var acc = setting.getValue({name: 'custrecord_sii_custpayment_setting_acc'})
+                /*accoutlist.each(function(result){
+                    name = result.getValue({name: 'acctnumber'});
+                    if(name != null && name != ''){
+                        if(result.id == acc){
+                            fee_account_item.addSelectOption({
+                                value : result.id,
+                                text : name,
+                                isSelected: true
+                            });
+                        }else{
+                            fee_account_item.addSelectOption({
+                                value : result.id,
+                                text : result.getValue({name: 'acctname'})
+                            });
+                        }
+                    }else{
+                        fee_account_item.addSelectOption({
+                                value : result.id,
+                                text : result.id
+                            });
+                    }
+                    return true;
+                });*/
                 form.clientScriptFileId = clientScriptFileId;
                 context.response.writePage(form);
             }else{
@@ -1013,18 +1095,52 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         return( resultSet );
     }
 
-    function getFeeList(){
+    function getSetting(){
         var mysearch = search.create({
-            type: 'customrecord_sii_custfee',
+            type: 'customrecord_sii_custpayment_setting',
+            columns: [{
+                name: 'custrecord_sii_custpayment_setting_acc'
+            },{
+                name: 'custrecord_sii_custpayment_setting_taxco'
+            },{
+                name: 'custrecord_sii_custpayment_setting_taxca'
+            },{
+                name: 'custrecord_sii_custpayment_setting_error'
+            },{
+                name: 'custrecord_sii_custpayment_setting_plus'
+            },{
+                name: 'custrecord_sii_custpayment_setting_minus'
+            }]
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
+    }
+
+    function getTaxCa(){
+        var mysearch = search.create({
+            type: 'customlist_4572_main_tax_category',
             columns: [{
                 name: 'name'
-            },{
-                name: 'custrecord_sii_custfee_tax'
-            },{
-                name: 'custrecord_sii_custfee_base'
-            },{
-                name: 'custrecord_sii_custfee_sum'
             }]
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
+    }
+
+    function getSalesTaxItem(){
+        var mysearch = search.create({
+            type: search.Type.SALES_TAX_ITEM,
+            columns: [{
+                name: 'itemid'
+            }]
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
+    }
+
+    function getAccount(){
+        var mysearch = search.load({
+            id: 'customsearch_sii_account_search'
         });
         var resultSet = mysearch.run();
         return( resultSet );
@@ -1038,6 +1154,38 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         });
         stringNumber = parseInt(stringtotal);
         return stringNumber;
+    }
+
+    function checkDate(paymentDate, fromDate, toDate){
+        if(fromDate != null && fromDate != ''){
+            if(toDate != null && toDate != ''){
+                if(paymentDate >= fromDate && paymentDate <= toDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if(paymentDate >= fromDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }else{
+            if(toDate != null && toDate != ''){
+                if(paymentDate <= toDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }else{
+                if(paymentDate >= fromDate){
+                    return true;
+                }else{
+                    return false;
+                }
+            }
+        }
     }
 
     return {
