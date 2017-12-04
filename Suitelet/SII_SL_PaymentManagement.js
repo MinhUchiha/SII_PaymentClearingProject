@@ -349,7 +349,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 });
 
                 // ì¸ã‡ä«óùàÍóó
-                var customer = getCustomerList();
                 var paymentSubList  = form.addSublist({
                     id: 'payment_sub_list',
                     type: serverWidget.SublistType.LIST,
@@ -380,30 +379,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 var customerSelect = paymentSubList.addField({
                     id: 'sub_list_3',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'customer',
                     label: 'å⁄ãq'
-                });
-                customerSelect.addSelectOption({
-                    value: 0,
-                    text: ' ',
-                    isSelected: true
-                });
-                customer.each(function(result) {
-                    var lastname = result.getValue({name: 'lastname'});
-                    var firstname = result.getValue({name: 'firstname'});
-                    var isperson = result.getValue({name: 'isperson'});
-                    var companyname = result.getValue({name: 'companyname'});
-                    if(isperson){
-                        customerSelect.addSelectOption({
-                            value: result.id,
-                            text: lastname+" "+firstname
-                        });
-                    }else{
-                        customerSelect.addSelectOption({
-                            value: result.id,
-                            text: companyname
-                        });
-                    }
-                    return true;
                 });
                 paymentSubList.addField({
                     id: 'sub_list_4',
@@ -520,10 +497,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             totalamount += parseInt(paymentamo);
                         }
                     }
-                    /*paymentdate = format.format({
-                        value: paymentdate,
-                        type: format.Type.DATE
-                    });*/
                     var output = url.resolveScript({
                         scriptId: 'customscript_sii_sl_paymentadjustment',
                         deploymentId: 'customdeploy_sii_sl_paymentadjustment',
@@ -675,14 +648,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 fee_account_item_label.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTROW
                 });
- 
+
                 var fee_account_item = form.addField({
                     id: 'fee_account_item',
-                    label: 'fee_account_item',
                     type: serverWidget.FieldType.SELECT,
+                    label: 'fee_account_item',
+                    source: 'account',
                     container: 'commission'
                 });
-                    
                 fee_account_item.label = '';
 
                 
@@ -717,6 +690,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'tax_code',
                     label: 'tax_code',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'salestaxitem',
                     container: 'commission'
                 });
                     
@@ -754,6 +728,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'tax_category',
                     label: 'tax_category',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'customlist_4572_main_tax_category',
                     container: 'commission'
                 });
                     
@@ -836,6 +811,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'plus_error',
                     label: 'plus_error',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'account',
                     container: 'error_subtab'
                 });
                     
@@ -873,6 +849,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'minus_error',
                     label: 'minus_error',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'account',
                     container: 'error_subtab'
                 });
                     
@@ -891,96 +868,16 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     start: 0,
                     end: 1
                 })[0];
-                settingList.each(function(result){
-                    acc = result.getText({name: 'custrecord_sii_custpayment_setting_acc'});
-                    taxco = result.getText({name: 'custrecord_sii_custpayment_setting_taxco'});
-                    taxca = result.getText({name: 'custrecord_sii_custpayment_setting_taxca'});
-                    error = result.getValue({name: 'custrecord_sii_custpayment_setting_error'});
-                    plus = result.getText({name: 'custrecord_sii_custpayment_setting_plus'});
-                    minus = result.getText({name: 'custrecord_sii_custpayment_setting_minus'});
-                    fee_account_item.addSelectOption({
-                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_acc'}),
-                        text : acc
-                    });
-                    /*tax_code.addSelectOption({
-                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_taxco'}),
-                        text : taxco
-                    });*/
-                    /*tax_category.addSelectOption({
-                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_taxca'}),
-                        text : taxca
-                    });*/
-                    error_difference.defaultValue = error;
-                    plus_error.addSelectOption({
-                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_plus'}),
-                        text : plus
-                    });
-                    minus_error.addSelectOption({
-                        value : result.getValue({name: 'custrecord_sii_custpayment_setting_minus'}),
-                        text : minus
-                    });
-                    return true;
-                })
-                var salesTaxItem = getSalesTaxItem();
-                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'})
-                salesTaxItem.each(function(result){
-                    if(result.id == taxCaSetting){
-                        tax_code.addSelectOption({
-                            value : result.id,
-                            text : result.getValue({name: 'itemid'}),
-                            isSelected: true
-                        });
-                    }else{
-                        tax_code.addSelectOption({
-                            value : result.id,
-                            text : result.getValue({name: 'itemid'})
-                        });
-                    }
-                    return true;
-                });
-                var taxCaList = getTaxCa();
-                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'})
-                taxCaList.each(function(result){
-                    if(result.id == taxCaSetting){
-                        tax_category.addSelectOption({
-                            value : result.id,
-                            text : result.getValue({name: 'name'}),
-                            isSelected: true
-                        });
-                    }else{
-                        taxca = result.getValue({name: 'name'});
-                        tax_category.addSelectOption({
-                            value : result.id,
-                            text : taxca
-                        });
-                    }
-                    return true;
-                });
-                var accoutlist = getAccount();
-                var acc = setting.getValue({name: 'custrecord_sii_custpayment_setting_acc'})
-                /*accoutlist.each(function(result){
-                    name = result.getValue({name: 'acctnumber'});
-                    if(name != null && name != ''){
-                        if(result.id == acc){
-                            fee_account_item.addSelectOption({
-                                value : result.id,
-                                text : name,
-                                isSelected: true
-                            });
-                        }else{
-                            fee_account_item.addSelectOption({
-                                value : result.id,
-                                text : result.getValue({name: 'acctname'})
-                            });
-                        }
-                    }else{
-                        fee_account_item.addSelectOption({
-                                value : result.id,
-                                text : result.id
-                            });
-                    }
-                    return true;
-                });*/
+                var taxCoSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'});
+                tax_code.defaultValue = taxCoSetting;
+                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'});
+                tax_category.defaultValue = taxCaSetting
+                var acc = setting.getValue({name: 'custrecord_sii_custpayment_setting_acc'});
+                fee_account_item.defaultValue = acc;
+                var plus = setting.getValue({name: 'custrecord_sii_custpayment_setting_plus'})
+                plus_error.defaultValue = plus;
+                var minus = setting.getValue({name: 'custrecord_sii_custpayment_setting_minus'})
+                minus_error.defaultValue = minus;
                 form.clientScriptFileId = clientScriptFileId;
                 context.response.writePage(form);
             }else{
@@ -1076,24 +973,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         var resultSet = myPaymentListSearch.run();
         return( myPaymentListSearch.run() );
     }
-    function getCustomerList(){
-        var mysearch = search.create({
-            type: search.Type.CUSTOMER,
-            columns: [{
-                name: 'entityid'
-            },{
-                name: 'lastname'
-            },{
-                name: 'firstname'
-            },{
-                name: 'isperson'
-            },{
-                name: 'companyname'
-            }]
-        });
-        var resultSet = mysearch.run();
-        return( resultSet );
-    }
 
     function getSetting(){
         var mysearch = search.create({
@@ -1111,36 +990,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             },{
                 name: 'custrecord_sii_custpayment_setting_minus'
             }]
-        });
-        var resultSet = mysearch.run();
-        return( resultSet );
-    }
-
-    function getTaxCa(){
-        var mysearch = search.create({
-            type: 'customlist_4572_main_tax_category',
-            columns: [{
-                name: 'name'
-            }]
-        });
-        var resultSet = mysearch.run();
-        return( resultSet );
-    }
-
-    function getSalesTaxItem(){
-        var mysearch = search.create({
-            type: search.Type.SALES_TAX_ITEM,
-            columns: [{
-                name: 'itemid'
-            }]
-        });
-        var resultSet = mysearch.run();
-        return( resultSet );
-    }
-
-    function getAccount(){
-        var mysearch = search.load({
-            id: 'customsearch_sii_account_search'
         });
         var resultSet = mysearch.run();
         return( resultSet );
