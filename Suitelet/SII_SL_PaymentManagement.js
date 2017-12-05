@@ -46,11 +46,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: format.Type.INTEGER
                 });
                 var status = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_status'});
-                var nowDate = new Date();
-                nowDate = format.format({
-                    value: nowDate,
-                    type: format.Type.DATE
-                });
                 var name = objRecord.getValue({fieldId: 'name'});
                 // フォーム定義
                 var form = serverWidget.createForm({
@@ -81,214 +76,33 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     displayType : serverWidget.FieldDisplayType.HIDDEN
                 });
                 //取込日
-                var labelNowDate = form.addField({
-                    id: 'labeldate',
-                    label: '取込日 : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                labelNowDate.defaultValue = '取込日 &nbsp;&nbsp;&nbsp;&nbsp;: ';
-                labelNowDate.label = '';
-                labelNowDate.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                labelNowDate.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                labelNowDate.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
                 var textNowDate = form.addField({
                     id: 'textdate',
-                    label: 'Date',
+                    label: '取込日',
                     type: serverWidget.FieldType.DATE
                 });
                 textNowDate.defaultValue = importDate;
-                textNowDate.label = '';
                 textNowDate.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
-                textNowDate.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textNowDate.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                                          
-                //入金日
-                var paymentDate = form.addField({
-                    id: 'paymentdate',
-                    label: '入金日 : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                paymentDate.defaultValue = '入金日 &nbsp;&nbsp;&nbsp;&nbsp;: ';
-                paymentDate.label = '';
-                paymentDate.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                paymentDate.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                paymentDate.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
-                
                 var paymentDateFrom = form.addField({
                     id: 'paymentdatefrom',
-                    label: nowDate,
+                    label: '入金日 (FROM)',
                     type: serverWidget.FieldType.DATE
                 });
-        
                 paymentDateFrom.defaultValue = fromDate;
-                paymentDateFrom.label = '';
-                
-                
-                paymentDateFrom.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                paymentDateFrom.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
 
-                //取込担当者
-                var labelUser = form.addField({
-                    id: 'labeluser',
-                    label: '取込担当者 : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                
-                labelUser.defaultValue = "<span style='margin-left: 300px'>取込担当者&nbsp;&nbsp;&nbsp;:</span>";
-                labelUser.label = '';
-                labelUser.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                labelUser.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                labelUser.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-
-                var textUser = form.addField({
-                    id: 'textuser',
-                    label: '田井良知',
-                    type: serverWidget.FieldType.TEXT
-                });
-                textUser.defaultValue = importPerson;
-                textUser.label = '';
-                textUser.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                
-                textUser.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textUser.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                var paymentSpace = form.addField({
-                    id: 'paymentspace',
-                    label: '~',
-                    type: serverWidget.FieldType.TEXT
-                });
-                paymentSpace.defaultValue = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
-                paymentSpace.label = '';
-                paymentSpace.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                paymentSpace.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE                    
-                });
-                paymentSpace.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
-                
                 var paymentDateTo = form.addField({
                     id: 'paymentdateto',
-                    label: nowDate,
+                    label: '入金日 (TO)',
                     type: serverWidget.FieldType.DATE
                 });
-        
                 paymentDateTo.defaultValue = toDate;
-                paymentDateTo.label = '';
-                
-                
-                paymentDateTo.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                paymentDateTo.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                //取込件数
-                var labelNumber = form.addField({
-                    id: 'labelnumber',
-                    label: '取込件数 : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                
-                labelNumber.defaultValue = "<span style='margin-left: 300px'>取込件数&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>";
-                labelNumber.label = '';
-                labelNumber.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                labelNumber.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                labelNumber.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
- 
-                var textNumber = form.addField({
-                    id: 'textnumber',
-                    label: 'textNumber',
-                    type: serverWidget.FieldType.TEXT
-                });
-                textNumber.defaultValue = importNumber;
-                textNumber.label = '';
-                textNumber.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                
-                textNumber.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textNumber.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                
-                //ステータス
-                var labelStatus = form.addField({
-                    id: 'labelstatus',
-                    label: 'ステータス : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                labelStatus.defaultValue = 'ステータス : ';
-                labelStatus.label = '';
-                labelStatus.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                labelStatus.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                labelStatus.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
- 
+
                 var textStatus = form.addField({
                     id: 'textstatus',
-                    label: nowDate,
+                    label: 'ステータス',
                     type: serverWidget.FieldType.TEXT
                 });
                 if(status == 2){
@@ -296,56 +110,39 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 }else{
                     textStatus.defaultValue = "正常取込";
                 }
-                textStatus.label = '';
                 textStatus.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
-                
-                textStatus.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textStatus.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                
-                //合計金額
-                var labelTotal = form.addField({
-                    id: 'labeltotal',
-                    label: '合計金額 : ',
+
+                var textUser = form.addField({
+                    id: 'textuser',
+                    label: '取込担当者',
                     type: serverWidget.FieldType.TEXT
                 });
-                
-                labelTotal.defaultValue = "<span style='margin-left: 365px'>合計金額&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:</span>";
-                labelTotal.label = '';
-                labelTotal.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
+                textUser.defaultValue = importPerson;
+                textUser.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
-                labelTotal.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
+ 
+                var textNumber = form.addField({
+                    id: 'textnumber',
+                    label: '取込件数',
+                    type: serverWidget.FieldType.TEXT
                 });
-                labelTotal.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
+                textNumber.defaultValue = importNumber;
+                textNumber.updateDisplayType({
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
+ 
+                //合計金額
  
                 var textTotal = form.addField({
                     id: 'texttotal',
                     label: '合計金額',
                     type: serverWidget.FieldType.TEXT
                 });
-                textTotal.label = '';
                 textTotal.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                
-                textTotal.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                textUser.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
+                    displayType: serverWidget.FieldDisplayType.DISABLED
                 });
 
                 // 入金管理一覧
@@ -775,7 +572,6 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: serverWidget.FieldType.TEXT,
                     container: 'error_subtab'
                 });
-                error_difference.defaultValue = '10';
                     
                 error_difference.label = '';
 
@@ -868,6 +664,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     start: 0,
                     end: 1
                 })[0];
+                var error = setting.getValue({name: 'custrecord_sii_custpayment_setting_error'});
+                error_difference.defaultValue = error
                 var taxCoSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'});
                 tax_code.defaultValue = taxCoSetting;
                 var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'});
@@ -909,13 +707,60 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     saveRecord.setValue({
                         fieldId: 'custrecord_sii_custpayment_date_to',
                         value: dateTo
-                    })
+                    });
                 }
                 saveRecord.setValue({
                     fieldId: 'custrecord_sii_custpayment_amountsum',
                     value: getInt(texttotal)
-                })
+                });
                 saveRecord.save();
+                var settingRecord = record.load({
+                    type: 'customrecord_sii_custpayment_setting',
+                    id: 1
+                });
+                var fee_account_item = context.request.parameters.fee_account_item;
+                var tax_code = context.request.parameters.tax_code;
+                var tax_category = context.request.parameters.tax_category;
+                var error_difference = context.request.parameters.error_difference;
+                var plus_error = context.request.parameters.plus_error;
+                var minus_error = context.request.parameters.minus_error;
+                if(fee_account_item != null && fee_account_item != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_acc',
+                        value: fee_account_item
+                    });
+                }
+                if(tax_code != null && tax_code != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_taxco',
+                        value: tax_code
+                    });
+                }
+                if(tax_category != null && tax_category != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_taxca',
+                        value: tax_category
+                    });
+                }
+                if(error_difference != null && error_difference != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_error',
+                        value: error_difference
+                    });
+                }
+                if(plus_error != null && plus_error != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_plus',
+                        value: plus_error
+                    });
+                }
+                if(minus_error != null && minus_error != ''){
+                    settingRecord.setValue({
+                        fieldId: 'custrecord_sii_custpayment_setting_minus',
+                        value: minus_error
+                    });
+                }
+                settingRecord.save();
                 var id = context.request.parameters.head_id;
                 redirect.toRecord({
                     type : 'customrecord_sii_custpayment_h',
