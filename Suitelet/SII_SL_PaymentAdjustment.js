@@ -59,234 +59,64 @@ function(serverWidget, http, record, search, redirect, format) {
                 });
                 head_id.defaultValue = custpayment_h_id;
                 //å⁄ãq
-                var label_customer = form.addField({
-                    id: 'label_customer',
-                    label: 'å⁄ãq : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                label_customer.defaultValue = 'å⁄ãq: ';
-                label_customer.label = '';
-                label_customer.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                label_customer.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                label_customer.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
- 
                 var text_customer = form.addField({
                     id: 'text_customer',
-                    label: 'text_customer',
+                    label: 'å⁄ãq',
                     type: serverWidget.FieldType.TEXT
                 });
         
                 text_customer.defaultValue = customer;
-                text_customer.label = '';
+                //text_customer.label = '';
                 text_customer.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
-                text_customer.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                text_customer.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                //ä˙ì˙
-                var due_date = form.addField({
-                    id: 'due_date',
-                    label: 'ä˙ì˙ : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                due_date.defaultValue = 'ä˙ì˙: ';
-                due_date.label = '';
-                due_date.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                due_date.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                due_date.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
-                
                 var dueDateFrom = form.addField({
                     id: 'duedatefrom',
-                    label: nowDate,
+                    label: 'ä˙ì˙ (FROM)',
                     type: serverWidget.FieldType.DATE
-                });
-        
-                dueDateFrom.defaultValue = nowDate;
-                dueDateFrom.label = '';
-                
-                
-                dueDateFrom.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                dueDateFrom.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                
-                var paymentSpace = form.addField({
-                    id: 'paymentspace',
-                    label: '~',
-                    type: serverWidget.FieldType.TEXT
-                });
-                paymentSpace.defaultValue = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
-                paymentSpace.label = '';
-                paymentSpace.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                paymentSpace.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE                    
-                });
-                paymentSpace.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
                 });
                 
                 var dueDateTo = form.addField({
                     id: 'duedateto',
-                    label: nowDate,
+                    label: 'ä˙ì˙ (TO)',
                     type: serverWidget.FieldType.DATE
                 });
         
-                dueDateTo.defaultValue = nowDate;
-                dueDateTo.label = '';
-                
-                
-                dueDateTo.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                dueDateTo.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                //éËêîóø
-                var fee_label = form.addField({
-                    id: 'fee_label',
-                    label: 'éËêîóø : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                fee_label.defaultValue = "<span style='margin-left: 500px'>éËêîóø</span>";
-                fee_label.label = '';
-                fee_label.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                fee_label.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-                });
-                fee_label.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                var fee = form.addField({
-                        id : 'fee',
-                        type : serverWidget.FieldType.TEXT,
-                        label : 'éËêîóø'
-                        });
-                fee.defaultValue = '540';
-                fee.label = '';
-                fee.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                fee.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                });
-                fee.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                //çáåv
-                var total_label = form.addField({
-                    id: 'total_label',
-                    label: 'çáåv : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                total_label.defaultValue = 'çáåv: ';
-                total_label.label = '';
-                total_label.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                total_label.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
-                });
-                total_label.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTROW
-                });
 
- 
                 var total_text = form.addField({
                     id: 'total_text',
-                    label: 'total_text',
+                    label: 'çáåv',
                     type: serverWidget.FieldType.TEXT
                 });
         
                 total_text.defaultValue = paymentamo;
-                total_text.label = '';
                 total_text.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
-                
                 total_text.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                    
+                    layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW
                 });
-                total_text.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
+
+                var fee = form.addField({
+                        id : 'fee',
+                        type : serverWidget.FieldType.INTEGER,
+                        label : 'éËêîóø'
+                        });
+                fee.defaultValue = 540;
+                var calculation_error = form.addField({
+                        id : 'calculation_error',
+                        type : serverWidget.FieldType.INTEGER,
+                        label : 'åvéZåÎç∑'
+                        });
+                calculation_error.defaultValue = -1;
+
                 
                 var subtab = form.addSubtab({
                         id : 'custpage_subtab',
                         label : 'êøãÅèëàÍóó'
                 });
 
-                //åvéZåÎç∑
-                var calculation_error_label = form.addField({
-                    id: 'calculation_error_label',
-                    label: 'åvéZåÎç∑ : ',
-                    type: serverWidget.FieldType.TEXT
-                });
-                calculation_error_label.defaultValue = "<span style='margin-left: 565px'>åvéZåÎç∑</span>";
-                calculation_error_label.label = '';
-                calculation_error_label.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                calculation_error_label.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDEABOVE
-                });
-                calculation_error_label.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                var calculation_error = form.addField({
-                        id : 'calculation_error',
-                        type : serverWidget.FieldType.TEXT,
-                        label : 'åvéZåÎç∑'
-                        });
-                calculation_error.defaultValue = "-1";
-                calculation_error.label = '';
-                calculation_error.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.INLINE
-                });
-                calculation_error.updateLayoutType({
-                    layoutType: serverWidget.FieldLayoutType.OUTSIDE
-                });
-                calculation_error.updateBreakType({
-                    breakType: serverWidget.FieldBreakType.STARTCOL
-                });
-                /*var calculation_error = form.addField({
-                        id : 'textfield',
-                        type : serverWidget.FieldType.TEXT,
-                        label : 'åvéZåÎç∑',
-                        container: 'custpage_subtab'
-                        });*/
-                
-                // êøãÅèëàÍóó
                 var invoiceSubList  = form.addSublist({
                     id: 'invoice_sub_list',
                     type: serverWidget.SublistType.LIST,
@@ -344,26 +174,20 @@ function(serverWidget, http, record, search, redirect, format) {
                 invoiceSubList.addField({
                     id: 'sub_list_8',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'account',
                     label: 'îÔópä®íËâ»ñ⁄'
-                }).addSelectOption({
-                    value: 1,
-                    text: 'ëdê≈åˆâ€:àÛéÜë„'
                 });
                 invoiceSubList.addField({
                     id: 'sub_list_9',
                     type: serverWidget.FieldType.SELECT,
+                    source: 'salestaxitem',
                     label: 'è¡îÔê≈'
-                }).addSelectOption({
-                    value: 1,
-                    text: '8%'
                 });
                 invoiceSubList.addField({
                     id: 'sub_list_10',
                     type: serverWidget.FieldType.SELECT,
-                    label: 'è¡îÔê≈ÉJÉeÉSÉä'
-                }).addSelectOption({
-                    value: 1,
-                    text: 'ã§í ëŒâû'
+                    label: 'è¡îÔê≈ÉJÉeÉSÉä',
+                    source: 'customlist_4572_main_tax_category',
                 });
                 
                 invoiceSubList.setSublistValue({
@@ -406,22 +230,28 @@ function(serverWidget, http, record, search, redirect, format) {
                     line: 0,
                     value: 1000000
                 });
+                var settingRecord = record.load({
+                    type: 'customrecord_sii_custpayment_setting',
+                    id: 1
+                });
+                var acc = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_s_acc'});
                 invoiceSubList.setSublistValue({
                     id: 'sub_list_8',
                     line: 0,
-                    value: 1
+                    value: acc
                 });
+                var taxco = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxco'})
                 invoiceSubList.setSublistValue({
                     id: 'sub_list_9',
                     line: 0,
-                    value: 1
+                    value: taxco
                 });
+                var taxCaSetting = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxca'});
                 invoiceSubList.setSublistValue({
                     id: 'sub_list_10',
                     line: 0,
-                    value: 1
+                    value: taxCaSetting
                 });
-                
                 context.response.writePage(form);
             }else{
                 var id = context.request.parameters.head_id;

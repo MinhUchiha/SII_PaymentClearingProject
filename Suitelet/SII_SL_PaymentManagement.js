@@ -24,8 +24,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             if (request.method === http.Method.GET) {
                 var objRecord = record.load({
                     type: 'customrecord_sii_custpayment_h',
-                    id: recordId,
-                    isDynamic: true
+                    id: recordId
                 });
                 var importDate = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_importdate'});
                 /*importDate = format.format({
@@ -47,6 +46,12 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 });
                 var status = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_status'});
                 var name = objRecord.getValue({fieldId: 'name'});
+                var saveAcc = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_acc'});
+                var saveTaxCo = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_taxco'});
+                var saveTaxCa = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_taxca'});
+                var saveError = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_error'});
+                var savePlus = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_plus'});
+                var saveMinus = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving_minus'});
                 // フォーム定義
                 var form = serverWidget.createForm({
                     title: '入金管理票'
@@ -303,7 +308,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     paymentSubList.setSublistValue({
                         id: 'sub_list_id',
                         line: i,
-                        value: '<a href="'+output+'">'+sub_list_id+'</a>'
+                        value: '<a href="'+output+'" target="_blank">'+sub_list_id+'</a>'
                     });
                     if(customerno == null || customerno == ''){
                         paymentSubList.setSublistValue({
@@ -569,7 +574,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 var error_difference = form.addField({
                     id: 'error_difference',
                     label: 'error_difference',
-                    type: serverWidget.FieldType.TEXT,
+                    type: serverWidget.FieldType.INTEGER,
                     container: 'error_subtab'
                 });
                     
@@ -664,29 +669,59 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     start: 0,
                     end: 1
                 })[0];
-                var error = setting.getValue({name: 'custrecord_sii_custpayment_setting_error'});
-                error_difference.defaultValue = error
-                var taxCoSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'});
-                tax_code.defaultValue = taxCoSetting;
-                var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'});
-                tax_category.defaultValue = taxCaSetting
-                var acc = setting.getValue({name: 'custrecord_sii_custpayment_setting_acc'});
-                fee_account_item.defaultValue = acc;
-                var plus = setting.getValue({name: 'custrecord_sii_custpayment_setting_plus'})
-                plus_error.defaultValue = plus;
-                var minus = setting.getValue({name: 'custrecord_sii_custpayment_setting_minus'})
-                minus_error.defaultValue = minus;
+                if(isEmpty(saveAcc)){
+                    var acc = setting.getValue({name: 'custrecord_sii_custpayment_setting_acc'});
+                    fee_account_item.defaultValue = acc;
+                }else{
+                    fee_account_item.defaultValue = saveAcc;
+                }
+                if(isEmpty(saveTaxCo)){
+                    var taxCoSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxco'});
+                    tax_code.defaultValue = taxCoSetting;
+                }else{
+                    tax_code.defaultValue = saveTaxCo;
+                }
+                if(isEmpty(saveTaxCa)){
+                    var taxCaSetting = setting.getValue({name: 'custrecord_sii_custpayment_setting_taxca'});
+                    tax_category.defaultValue = taxCaSetting
+                }else{
+                    tax_category.defaultValue = saveTaxCa;
+                }
+                if(isEmpty(saveError)){
+                    var error = setting.getValue({name: 'custrecord_sii_custpayment_setting_error'});
+                    error_difference.defaultValue = error;
+                }else{
+                    error_difference.defaultValue = saveError;
+                }
+                if(isEmpty(savePlus)){
+                    var plus = setting.getValue({name: 'custrecord_sii_custpayment_setting_plus'});
+                    plus_error.defaultValue = plus;
+                }else{
+                    plus_error.defaultValue = savePlus;
+                }
+                if(isEmpty(saveMinus)){
+                    var minus = setting.getValue({name: 'custrecord_sii_custpayment_setting_minus'});
+                    minus_error.defaultValue = minus;
+                }else{
+                    minus_error.defaultValue = saveMinus;
+                }
                 form.clientScriptFileId = clientScriptFileId;
                 context.response.writePage(form);
             }else{
                 var id = context.request.parameters.head_id;
-                var texttotal = context.request.parameters.texttotal
+                var texttotal = context.request.parameters.texttotal;
+                var fee_account_item = context.request.parameters.fee_account_item;
+                var tax_code = context.request.parameters.tax_code;
+                var tax_category = context.request.parameters.tax_category;
+                var error_difference = context.request.parameters.error_difference;
+                var plus_error = context.request.parameters.plus_error;
+                var minus_error = context.request.parameters.minus_error;
                 var saveRecord = record.load({
                     type: 'customrecord_sii_custpayment_h',
                     id: id
                 });
                 var dateFrom = context.request.parameters.paymentdatefrom;
-                if(dateFrom != null && dateFrom != ''){
+                if(!isEmpty(dateFrom)){
                     dateFrom = format.parse({
                         value: dateFrom,
                         type: format.Type.DATE
@@ -698,7 +733,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     });
                 }
                 var dateTo = context.request.parameters.paymentdateto;
-                if(dateTo != null && dateTo != ''){
+                if(!isEmpty(dateTo)){
                     dateTo = format.parse({
                         value: dateTo,
                         type: format.Type.DATE
@@ -713,55 +748,31 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     fieldId: 'custrecord_sii_custpayment_amountsum',
                     value: getInt(texttotal)
                 });
-                saveRecord.save();
-                var settingRecord = record.load({
-                    type: 'customrecord_sii_custpayment_setting',
-                    id: 1
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_acc',
+                    value: fee_account_item
                 });
-                var fee_account_item = context.request.parameters.fee_account_item;
-                var tax_code = context.request.parameters.tax_code;
-                var tax_category = context.request.parameters.tax_category;
-                var error_difference = context.request.parameters.error_difference;
-                var plus_error = context.request.parameters.plus_error;
-                var minus_error = context.request.parameters.minus_error;
-                if(fee_account_item != null && fee_account_item != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_acc',
-                        value: fee_account_item
-                    });
-                }
-                if(tax_code != null && tax_code != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_taxco',
-                        value: tax_code
-                    });
-                }
-                if(tax_category != null && tax_category != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_taxca',
-                        value: tax_category
-                    });
-                }
-                if(error_difference != null && error_difference != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_error',
-                        value: error_difference
-                    });
-                }
-                if(plus_error != null && plus_error != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_plus',
-                        value: plus_error
-                    });
-                }
-                if(minus_error != null && minus_error != ''){
-                    settingRecord.setValue({
-                        fieldId: 'custrecord_sii_custpayment_setting_minus',
-                        value: minus_error
-                    });
-                }
-                settingRecord.save();
-                var id = context.request.parameters.head_id;
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_taxco',
+                    value: tax_code
+                });
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_taxca',
+                    value: tax_category
+                });
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_error',
+                    value: error_difference
+                });
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_plus',
+                    value: plus_error
+                });
+                saveRecord.setValue({
+                    fieldId: 'custrecord_sii_custpayment_saving_minus',
+                    value: minus_error
+                });
+                saveRecord.save();
                 redirect.toRecord({
                     type : 'customrecord_sii_custpayment_h',
                     id : id
@@ -851,8 +862,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
     }
 
     function checkDate(paymentDate, fromDate, toDate){
-        if(fromDate != null && fromDate != ''){
-            if(toDate != null && toDate != ''){
+        if(!isEmpty(fromDate)){
+            if(!isEmpty(toDate)){
                 if(paymentDate >= fromDate && paymentDate <= toDate){
                     return true;
                 }else{
@@ -866,7 +877,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 }
             }
         }else{
-            if(toDate != null && toDate != ''){
+            if(!isEmpty(toDate)){
                 if(paymentDate <= toDate){
                     return true;
                 }else{
@@ -881,6 +892,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             }
         }
     }
+
+    function isEmpty(stValue) {
+            if ((stValue == null) || (stValue == '') || (stValue == undefined)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
 
     return {
         onRequest: onRequest

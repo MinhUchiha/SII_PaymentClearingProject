@@ -68,20 +68,31 @@ function(dialog,currentRecord,search,message,file,record,format) {
             fieldId : 'head_id'
         });
         var line = scriptContext.line;
+        var formDate = currentRecord.getValue({
+            fieldId: 'paymentdatefrom'
+        });
+        var toDate = currentRecord.getValue({
+            fieldId: 'paymentdateto'
+        });
         if(line != null){
-            check = currentRecord.getSublistValue({ 
+            var check = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId : 'sub_list_check',
                 line : line
             });
             var totalvalue = currentRecord.getValue({
-                    fieldId: 'texttotal'
+                fieldId: 'texttotal'
             });
             totalvalue = getInt(totalvalue);
             var id = currentRecord.getSublistValue({
                 sublistId: 'payment_sub_list',
                 fieldId: 'id',
                 line: line
+            });
+            var paymentDate = currentRecord.getSublistValue({ 
+                sublistId: 'payment_sub_list',
+                fieldId : 'sub_list_4',
+                line : line 
             });
             if(check){
                 var matchField = currentRecord.getSublistField({ 
@@ -111,8 +122,9 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'sub_list_8',
                     line: line
                 });
-                amount = parseInt(amount);
-                totalvalue = totalvalue - amount;
+                if(checkDate(paymentDate, formDate, toDate)){
+                    totalvalue = totalvalue - amount;
+                }
                 totalvalue = format.format({
                     value: totalvalue,
                     type: format.Type.INTEGER
@@ -145,8 +157,9 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'sub_list_8',
                     line: line
                 });
-                amount = parseInt(amount);
-                totalvalue = totalvalue + amount;
+                if(checkDate(paymentDate, formDate, toDate)){
+                    totalvalue = totalvalue + amount;
+                }
                 totalvalue = format.format({
                     value: totalvalue,
                     type: format.Type.INTEGER
@@ -163,30 +176,24 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 var numLines = currentRecord.getLineCount({
                     sublistId: 'payment_sub_list'
                 });
-                var formDate = currentRecord.getValue({
-                    fieldId: 'paymentdatefrom'
-                });
-                var toDate = currentRecord.getValue({
-                    fieldId: 'paymentdateto'
-                });
                 totalvalue = 0;
                 for (i = 0; i < numLines; i++) {
-                    var paymentDate = currentRecord.getSublistValue({ 
-                        sublistId: 'payment_sub_list',
-                        fieldId : 'sub_list_4',
-                        line : i 
-                    });
-                    var paymentDate = currentRecord.getSublistValue({ 
-                        sublistId: 'payment_sub_list',
-                        fieldId : 'sub_list_4',
-                        line : i 
-                    });
                     var amount = currentRecord.getSublistValue({
                         sublistId: 'payment_sub_list',
                         fieldId: 'sub_list_8',
                         line: i
                     });
-                    if(checkDate(paymentDate, formDate, toDate)){
+                    var paymentDate = currentRecord.getSublistValue({ 
+                        sublistId: 'payment_sub_list',
+                        fieldId : 'sub_list_4',
+                        line : i 
+                    });
+                    var check = currentRecord.getSublistValue({ 
+                        sublistId: 'payment_sub_list',
+                        fieldId : 'sub_list_check',
+                        line : i
+                    });
+                    if(checkDate(paymentDate, formDate, toDate) && !check){
                         totalvalue += amount
                     }
                 }
@@ -203,8 +210,8 @@ function(dialog,currentRecord,search,message,file,record,format) {
     }
 
     function checkDate(paymentDate, fromDate, toDate){
-        if(fromDate != null && fromDate != ''){
-            if(toDate != null && toDate != ''){
+        if(!isEmpty(fromDate)){
+            if(!isEmpty(toDate)){
                 if(paymentDate >= fromDate && paymentDate <= toDate){
                     return true;
                 }else{
@@ -218,7 +225,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 }
             }
         }else{
-            if(toDate != null && toDate != ''){
+            if(!isEmpty(toDate)){
                 if(paymentDate <= toDate){
                     return true;
                 }else{
@@ -231,6 +238,13 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     return false;
                 }
             }
+        }
+    }
+    function isEmpty(stValue) {
+        if ((stValue == null) || (stValue == '') || (stValue == undefined)) {
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -267,7 +281,6 @@ function(dialog,currentRecord,search,message,file,record,format) {
      * @since 2015.2
      */
     function sublistChanged(scriptContext) {
-
     }
 
     /**
