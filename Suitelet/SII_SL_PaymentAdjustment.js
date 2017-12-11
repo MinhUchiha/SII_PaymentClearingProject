@@ -24,9 +24,10 @@ function(serverWidget, http, record, search, redirect, format) {
                     type: 'customrecord_sii_custpayment',
                     id: recordId
                 });
-                var customer = objRecord.getText({fieldId: 'custrecord_sii_custpayment_client'});
+                var customer = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_client'});
                 var paymentamo = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_paymentamo'});
                 var custpayment_h_id = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_h_id'});
+                var saving = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving'});
                 var paymentamo = format.format({
                     value: paymentamo,
                     type: format.Type.INTEGER
@@ -58,16 +59,25 @@ function(serverWidget, http, record, search, redirect, format) {
                     displayType : serverWidget.FieldDisplayType.HIDDEN
                 });
                 head_id.defaultValue = custpayment_h_id;
+
+                var savingArray = [];
+                if(saving != '' && saving != null){
+                    savingArray = saving.split(",");
+                }
+                if(savingArray.length > 0){
+                    customer = savingArray[1];
+                }
                 //å⁄ãq
-                var text_customer = form.addField({
-                    id: 'text_customer',
-                    label: 'å⁄ãq',
-                    type: serverWidget.FieldType.TEXT
+                var customerField = form.addField({
+                    id: 'customer',
+                    type: serverWidget.FieldType.SELECT,
+                    source: 'customer',
+                    label: 'å⁄ãq'
                 });
-        
-                text_customer.defaultValue = customer;
+
+                customerField.defaultValue = customer;
                 //text_customer.label = '';
-                text_customer.updateDisplayType({
+                customerField.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
@@ -149,17 +159,17 @@ function(serverWidget, http, record, search, redirect, format) {
                     id: 'sub_list_3',
                     type: serverWidget.FieldType.CURRENCY,
                     label: 'êøãÅäz'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 invoiceSubList.addField({
                     id: 'sub_list_4',
                     type: serverWidget.FieldType.CURRENCY,
                     label: 'ìKópäz'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 invoiceSubList.addField({
                     id: 'sub_list_5',
                     type: serverWidget.FieldType.CURRENCY,
                     label: 'í≤êÆäz'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 var sub_list_6 = invoiceSubList.addField({
                     id: 'sub_list_6',
                     type: serverWidget.FieldType.CHECKBOX,
@@ -170,7 +180,7 @@ function(serverWidget, http, record, search, redirect, format) {
                     id: 'sub_list_7',
                     type: serverWidget.FieldType.CURRENCY,
                     label: 'ñ¢ìKóp'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 invoiceSubList.addField({
                     id: 'sub_list_8',
                     type: serverWidget.FieldType.SELECT,

@@ -76,7 +76,7 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 				    context.response.writePage(form);
 				}else{
 				    var fileId = fileObj.save();
-					var recCustpaymentHeadId = createCustomRecord(arrData,fileObj.name);
+				    var recCustpaymentHeadId = createCustomRecord(arrData,fileObj.name);
 					redirect.toSuitelet({
 						scriptId: 'customscript_sii_sl_paymentmanagement' ,
 						deploymentId: 'customdeploy_sii_sl_paymentmanagement',
@@ -142,10 +142,6 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 					value: nowDate
 				});
 				recCustpaymentHead.setValue({
-					fieldId: 'custrecord_sii_custpayment_importnumber',
-					value: format.parse({value: arrData[i][1],type: format.Type.INTEGER})
-				});
-				recCustpaymentHead.setValue({
 					fieldId: 'custrecord_sii_custpayment_amountsum',
 					value: format.parse({value: arrData[i][2],type: format.Type.INTEGER})
 				});
@@ -168,50 +164,68 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 				break;
 			}
 		}
-		var j = 0;
+		paymentArray = [];
 		for (var i = 0; i < arrData.length-1; i++) {
 			if(arrData[i][0] == 2){
-				var date = new Date(coventDate((arrData[i][2]),warekiYear));
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_depositnum',
-					line: j,
-					value: arrData[i][1]
-				});
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_paymentdate',
-					value: date,
-					line: j
-				});
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_bank',
-					value: arrData[i][8],
-					line: j
-				});
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_branchoff',
-					value: arrData[i][9],
-					line: j
-				});
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_request',
-					value: arrData[i][7],
-					line: j
-				});
-				recCustpaymentHead.setSublistValue({
-					sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-					fieldId: 'custrecord_sii_custpayment_paymentamo',
-					value: format.parse({value: arrData[i][4],type: format.Type.INTEGER}),
-					line: j
-				});
-			    j++;
+				var k = 0;
+				for(var j =0; j < paymentArray.length; j++){
+					if(arrData[i][8] == paymentArray[j][8] && arrData[i][9] == paymentArray[j][9] && arrData[i][7] == paymentArray[j][7]){
+						paymentArray[j][4] = parseFloat(paymentArray[j][4])+parseFloat(arrData[i][4]);
+						k = 1;
+						break;
+					}
+				}
+				if(k == 0){
+					paymentArray.push(arrData[i]);
+				}
 			}
 		}
+		var j = 0;
+		for(var i = 0; i < paymentArray.length; i++){
+			var date = new Date(coventDate((paymentArray[i][2]),warekiYear));
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_depositnum',
+				line: j,
+				value: paymentArray[i][1]
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_paymentdate',
+				value: date,
+				line: j
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_bank',
+				value: paymentArray[i][8],
+				line: j
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_branchoff',
+				value: paymentArray[i][9],
+				line: j
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_request',
+				value: paymentArray[i][7],
+				line: j
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_paymentamo',
+				value: format.parse({value: paymentArray[i][4],type: format.Type.INTEGER}),
+				line: j
+			});
+		    j++;
+		}
 		if(j !== 0){
+			recCustpaymentHead.setValue({
+					fieldId: 'custrecord_sii_custpayment_importnumber',
+					value: paymentArray.length
+				});
 			recCustpaymentHead.setValue({
 			    fieldId: 'custrecord_sii_custpayment_status',
 			    value: 1

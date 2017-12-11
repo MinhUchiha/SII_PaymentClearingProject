@@ -238,7 +238,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 });
                 var i = 0;
                 var totalamount = 0;
-                var resultSet = getPaymentList(recordId)
+                var resultSet = getPaymentList(recordId);
+                var invoiceList = getInvoice();
                 resultSet.each(function(result) {
                     var sub_list_id = result.getValue({
                         name: 'custrecord_sii_custpayment_depositnum'
@@ -269,9 +270,20 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     var claimsum = result.getValue({
                         name: 'custrecord_sii_custpayment_claimsum'
                     });
+                    invoiceList.each(function(result) {
+                        entity = result.getValue(invoiceList.columns[0]);
+                        amount = result.getValue(invoiceList.columns[1]);
+                        if(entity == client){
+                            claimsum = parseInt(amount);
+                        }
+                        return true;
+                    })
                     var match = result.getValue({
                         name: 'custrecord_sii_custpayment_match'
                     });
+                    if(claimsum == paymentamo){
+                        match = true;
+                    }
                     var consumption = result.getValue({
                         name: 'custrecord_sii_custpayment_consumption'
                     });
@@ -413,7 +425,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             value: 'F'
                         });
                     }
-                    i++
+                    i++;
                     return true;
                 });
                 totalamount = format.format({
@@ -846,6 +858,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             },{
                 name: 'custrecord_sii_custpayment_setting_minus'
             }]
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
+    }
+
+    function getInvoice(){
+        var mysearch = search.load({
+            id: 'customsearch_sii_custpayment_invoice'
         });
         var resultSet = mysearch.run();
         return( resultSet );

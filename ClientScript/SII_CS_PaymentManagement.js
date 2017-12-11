@@ -94,6 +94,31 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 fieldId : 'sub_list_4',
                 line : line 
             });
+            var id = currentRecord.getSublistValue({
+                sublistId: 'payment_sub_list',
+                fieldId : 'id',
+                line : line 
+            });
+            var client = currentRecord.getSublistValue({ 
+                sublistId: 'payment_sub_list',
+                fieldId: 'sub_list_3',
+                line: line 
+            });
+            var match = currentRecord.getSublistValue({ 
+                sublistId: 'payment_sub_list',
+                fieldId: 'sub_list_10',
+                line: line 
+            });
+            var consumption = currentRecord.getSublistValue({ 
+                sublistId: 'payment_sub_list',
+                fieldId: 'sub_list_11',
+                line: line 
+            });
+            var fee = currentRecord.getSublistValue({ 
+                sublistId: 'payment_sub_list',
+                fieldId: 'sub_list_12',
+                line: line
+            });
             if(check){
                 var matchField = currentRecord.getSublistField({ 
                     sublistId: 'payment_sub_list',
@@ -112,11 +137,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'sub_list_12',
                     line: line
                 });
-                var consumptionField = currentRecord.getSublistField({ 
-                    sublistId: 'payment_sub_list',
-                    fieldId: 'sub_list_11',
-                    line: line 
-                });
+                feeField.isDisabled = true;
                 var amount = currentRecord.getSublistValue({
                     sublistId: 'payment_sub_list',
                     fieldId: 'sub_list_8',
@@ -133,7 +154,6 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'texttotal',
                     value: totalvalue
                 });
-                feeField.isDisabled = true;
             }else{
                 var matchField = currentRecord.getSublistField({ 
                     sublistId: 'payment_sub_list',
@@ -152,6 +172,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'sub_list_12',
                     line: line 
                 });
+                feeField.isDisabled = false;
                 var amount = currentRecord.getSublistValue({
                     sublistId: 'payment_sub_list',
                     fieldId: 'sub_list_8',
@@ -168,8 +189,16 @@ function(dialog,currentRecord,search,message,file,record,format) {
                     fieldId: 'texttotal',
                     value: totalvalue
                 });
-                feeField.isDisabled = false;
             }
+            var savingString = check+','+client+','+match+','+consumption+','+fee;
+
+            var id = record.submitFields({
+                type: 'customrecord_sii_custpayment',
+                id: id,
+                values: {
+                    custrecord_sii_custpayment_saving: savingString
+                }
+            });
         }else{
             var fieldId = scriptContext.fieldId;
             if(fieldId == 'paymentdatefrom' || fieldId == 'paymentdateto'){
