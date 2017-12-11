@@ -95,6 +95,12 @@ function(serverWidget,url,runtime,record, redirect, search) {
                                 value: customerArray[m].id,
                                 line: i
                             });
+                            currentRecord.setSublistValue({
+                                sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+                                fieldId: 'custrecord_sii_custpayment_client_half',
+                                value: customerArray[m].getValue({name: 'custentity_hankakukana_name'}),
+                                line: i
+                            });
                             break;
                         } 
                     }
@@ -132,6 +138,8 @@ function(serverWidget,url,runtime,record, redirect, search) {
                 name: 'custentity_sii_custpayment_branchname'
             }, {
                 name: 'custentity_sii_custpayment_clientname'
+            }, {
+                name: 'custentity_hankakukana_name'
             }]
         });
         var resultSet = myCustomerListSearch.run();
@@ -140,6 +148,76 @@ function(serverWidget,url,runtime,record, redirect, search) {
             end: SLICE_LIMIT
         });
         return( customerArray );
+    }
+
+    function createKanaMap(properties, values) {
+        var kanaMap = {};
+        // 念のため文字数が同じかどうかをチェックする(ちゃんとマッピングできるか)
+        if(properties.length === values.length) {
+            for(var i=0, len=properties.length; i<len; i++) {
+                var property= properties.charCodeAt(i),
+                    value = values.charCodeAt(i);
+                kanaMap[property] = value;
+            }
+        }
+        return kanaMap;
+    };
+
+    // 全角から半角への変換用マップ
+    var m = createKanaMap(
+        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョ',
+        'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｯｬｭｮ'
+    );
+    // 半角から全角への変換用マップ
+    /*var mm = createKanaMap(
+        'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝｧｨｩｪｫｯｬｭｮ',
+        'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲンァィゥェォッャュョ'
+    );*/
+
+    // 全角から半角への変換用マップ
+    var g = createKanaMap(
+        'ガギグゲゴザジズゼゾダヂヅデドバビブベボ',
+        'ｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾊﾋﾌﾍﾎ'
+    );
+    // 半角から全角への変換用マップ
+    /*var gg = createKanaMap(
+        'ｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾊﾋﾌﾍﾎ',
+        'ガギグゲゴザジズゼゾダヂヅデドバビブベボ'
+    );*/
+      
+    // 全角から半角への変換用マップ
+    var p = createKanaMap(
+        'パピプペポ',
+        'ﾊﾋﾌﾍﾎ'
+    );
+    // 半角から全角への変換用マップ
+    /*var pp = createKanaMap(
+        'ﾊﾋﾌﾍﾎ',
+        'パピプペポ'
+    );*/
+
+    var gMark = 'ﾞ'.charCodeAt(0);
+    var pMark = 'ﾟ'.charCodeAt(0);
+
+    function convertKanaToOneByte(str){
+        for(var i=0, len=str.length; i<len; i++) {
+            if(g.hasOwnProperty(str.charCodeAt(i)) || p.hasOwnProperty(str.charCodeAt(i))) {
+                if(g[str.charCodeAt(i)]) {
+                    str = str.replace(str[i], String.fromCharCode(g[str.charCodeAt(i)])+String.fromCharCode(gMark));
+                }else if(p[str.charCodeAt(i)]) {
+                    str = str.replace(str[i], String.fromCharCode(p[str.charCodeAt(i)])+String.fromCharCode(pMark));
+                }else {
+                    break;
+                }
+                i++;
+                len = str.length;
+            }else {
+                if(m[str.charCodeAt(i)]) {
+                    str = str.replace(str[i], String.fromCharCode(m[str.charCodeAt(i)]));
+                }
+            }
+        }
+        return str;
     }
 
     return {

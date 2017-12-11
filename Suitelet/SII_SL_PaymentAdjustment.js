@@ -42,7 +42,7 @@ function(serverWidget, http, record, search, redirect, format) {
                 form.addButton({
                     id: 'cancelButton',
                     label: 'キャンセル',
-                    functionName: 'btnCancelButton();'
+                    functionName: 'history.go(-1);'
                 }); 
                 
                 var nowDate = new Date();
@@ -76,10 +76,6 @@ function(serverWidget, http, record, search, redirect, format) {
                 });
 
                 customerField.defaultValue = customer;
-                //text_customer.label = '';
-                customerField.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.DISABLED
-                });
                 
                 var dueDateFrom = form.addField({
                     id: 'duedatefrom',
@@ -101,9 +97,6 @@ function(serverWidget, http, record, search, redirect, format) {
                 });
         
                 total_text.defaultValue = paymentamo;
-                total_text.updateDisplayType({
-                    displayType: serverWidget.FieldDisplayType.DISABLED
-                });
                 total_text.updateLayoutType({
                     layoutType: serverWidget.FieldLayoutType.OUTSIDEBELOW
                 });
@@ -199,68 +192,81 @@ function(serverWidget, http, record, search, redirect, format) {
                     label: '消費税カテゴリ',
                     source: 'customlist_4572_main_tax_category',
                 });
-                
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_id',
-                    line: 0,
-                    value: 'INV0091'
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_1',
-                    line: 0,
-                    value: nowDate
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_2',
-                    line: 0,
-                    value: 'AAA部'
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_3',
-                    line: 0,
-                    value: 1300000
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_4',
-                    line: 0,
-                    value: 299000
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_5',
-                    line: 0,
-                    value: 1000
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_6',
-                    line: 0,
-                    value: 'F'
-                });
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_7',
-                    line: 0,
-                    value: 1000000
-                });
-                var settingRecord = record.load({
-                    type: 'customrecord_sii_custpayment_setting',
-                    id: 1
-                });
-                var acc = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_s_acc'});
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_8',
-                    line: 0,
-                    value: acc
-                });
-                var taxco = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxco'})
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_9',
-                    line: 0,
-                    value: taxco
-                });
-                var taxCaSetting = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxca'});
-                invoiceSubList.setSublistValue({
-                    id: 'sub_list_10',
-                    line: 0,
-                    value: taxCaSetting
+
+                var invoiceList = getInvoiceList();
+                var i = 0;
+                invoiceList.each(function(result) {
+                    var invoiceCustomer = result.getValue(invoiceList.columns[0]);
+                    var tranid = result.getValue(invoiceList.columns[2]);
+                    var duedate = result.getValue(invoiceList.columns[1]);
+                    var amount = result.getValue(invoiceList.columns[3]);
+                    var amountremaining = result.getValue(invoiceList.columns[4]);
+                    if(invoiceCustomer == customer ){
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_id',
+                            line: i,
+                            value: tranid
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_1',
+                            line: i,
+                            value: duedate
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_2',
+                            line: i,
+                            value: 'AAA部'
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_3',
+                            line: i,
+                            value: amount
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_4',
+                            line: i,
+                            value: amountremaining
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_5',
+                            line: i,
+                            value: 1000
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_6',
+                            line: i,
+                            value: 'F'
+                        });
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_7',
+                            line: i,
+                            value: 1000000
+                        });
+                        var settingRecord = record.load({
+                            type: 'customrecord_sii_custpayment_setting',
+                            id: 1
+                        });
+                        var acc = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_s_acc'});
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_8',
+                            line: i,
+                            value: acc
+                        });
+                        var taxco = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxco'})
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_9',
+                            line: i,
+                            value: taxco
+                        });
+                        var taxCaSetting = settingRecord.getValue({fieldId: 'custrecord_sii_custpayment_setting_taxca'});
+                        invoiceSubList.setSublistValue({
+                            id: 'sub_list_10',
+                            line: i,
+                            value: taxCaSetting
+                        });
+                        i++;
+                    }
+                    return true;
                 });
                 context.response.writePage(form);
             }else{
@@ -277,6 +283,14 @@ function(serverWidget, http, record, search, redirect, format) {
                 details: e.message
             });
         }
+    }
+
+    function getInvoiceList(){
+        var mysearch = search.load({
+            id: 'customsearch_custpayment_invoice_detail'
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
     }
 
     return {

@@ -62,7 +62,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 form.addButton({
                     id: 'cancelButton',
                     label: 'ƒLƒƒƒ“ƒZƒ‹',
-                    functionName: 'btnCancelButton();'
+                    functionName: 'history.go(-1);'
                 }); 
                 form.addButton({
                     id: 'runButton',
@@ -185,6 +185,11 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     label: 'ŒÚ‹q'
                 });
                 paymentSubList.addField({
+                    id: 'client_half',
+                    type: serverWidget.FieldType.TEXT,
+                    label: '”¼ŠpƒJƒiŽÐ–¼'
+                });
+                paymentSubList.addField({
                     id: 'sub_list_4',
                     type: serverWidget.FieldType.DATE,
                     label: '“ü‹à“ú'
@@ -270,6 +275,9 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     var claimsum = result.getValue({
                         name: 'custrecord_sii_custpayment_claimsum'
                     });
+                    var client_half = result.getValue({
+                        name: 'custrecord_sii_custpayment_client_half'
+                    });
                     invoiceList.each(function(result) {
                         entity = result.getValue(invoiceList.columns[0]);
                         amount = result.getValue(invoiceList.columns[1]);
@@ -346,6 +354,11 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             id: 'sub_list_3',
                             line: i,
                             value: client
+                        });
+                        paymentSubList.setSublistValue({
+                            id: 'client_half',
+                            line: i,
+                            value: client_half
                         });
                     }
                     paymentSubList.setSublistValue({
@@ -831,6 +844,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 name: 'custrecord_sii_custpayment_consumption'
             },{
                 name: 'custrecord_sii_custpayment_fee'
+            },{
+                name: 'custrecord_sii_custpayment_client_half'
             }],
             filters: [{
                 name: 'custrecord_sii_custpayment_h_id',
