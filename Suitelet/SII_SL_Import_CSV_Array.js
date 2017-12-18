@@ -142,8 +142,8 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 					value: nowDate
 				});
 				recCustpaymentHead.setValue({
-					fieldId: 'custrecord_sii_custpayment_amountsum',
-					value: format.parse({value: arrData[i][2],type: format.Type.INTEGER})
+					fieldId: 'custrecord_sii_custpayment_importnumber',
+					value: format.parse({value: arrData[i][1],type: format.Type.INTEGER})
 				});
 				recCustpaymentHead.setValue({
 					fieldId: 'custrecord_sii_custpayment_amountsum',
@@ -222,10 +222,6 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 		    j++;
 		}
 		if(j !== 0){
-			recCustpaymentHead.setValue({
-					fieldId: 'custrecord_sii_custpayment_importnumber',
-					value: paymentArray.length
-				});
 			recCustpaymentHead.setValue({
 			    fieldId: 'custrecord_sii_custpayment_status',
 			    value: 1

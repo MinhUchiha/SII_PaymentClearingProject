@@ -3,9 +3,9 @@
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
  */
-define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file', 'N/record', 'N/format'],
+define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file', 'N/record', 'N/format', 'N/url'],
 
-function(dialog,currentRecord,search,message,file,record,format) {
+function(dialog,currentRecord,search,message,file,record,format,url) {
     
     /**
      * Function to be executed after page is initialized.
@@ -412,7 +412,14 @@ function(dialog,currentRecord,search,message,file,record,format) {
     }
     function btnReturnButton() {
     	
-    	
+    }
+
+    function btnRunButton(recordId) {
+        var output = url.resolveRecord({
+            recordType: 'customrecord_sii_custpayment_h',
+            recordId: recordId
+        });
+        window.open(output);
     }
 
     return {
@@ -428,8 +435,8 @@ function(dialog,currentRecord,search,message,file,record,format) {
         saveRecord: saveRecord,
         btnReturnButton: btnReturnButton,
         btnSearchButton: btnSearchButton,
-        btnClearButton: btnClearButton
-        
+        btnClearButton: btnClearButton,
+        btnRunButton: btnRunButton
     };
     
 });

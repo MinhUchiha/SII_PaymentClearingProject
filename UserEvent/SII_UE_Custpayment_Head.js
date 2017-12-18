@@ -27,6 +27,15 @@ function(serverWidget,url,runtime,record, redirect, search) {
     				parameters: {'custscript_custpayment_head_id': currentRecord.id}
     			});
     		}
+            /*if(scriptContext.type === scriptContext.UserEventType.VIEW){
+                var form = scriptContext.form;
+                var currentRecord = scriptContext.newRecord;
+                form.addButton({
+                    id : 'custpage_print_receipt',
+                    label : 'é¿çs',
+                    functionName: "window.history.go(-1);" 
+                });
+            }*/
     	}catch(e){
     		log.error('UE: ' + e.name);
     	}

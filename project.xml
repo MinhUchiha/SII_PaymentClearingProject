@@ -2,7 +2,11 @@
   <folder name="SII_PaymentClearingProject" bundleable="false">
     <folder name="ClientScript" bundleable="false">
       <file name="SII_CS_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_CS_PaymentAdjustment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_CS_PaymentManagement.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+    </folder>
+    <folder name="Common" bundleable="false">
+      <file name="SII_PL_Common.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
     </folder>
     <folder name="Schedule" bundleable="false"/>
     <folder name="Suitelet" bundleable="false">
