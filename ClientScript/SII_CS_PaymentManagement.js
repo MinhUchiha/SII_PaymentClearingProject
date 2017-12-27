@@ -75,6 +75,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             fieldId: 'paymentdateto'
         });
         if(line != null){
+            //除
             var check = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId : 'sub_list_check',
@@ -84,41 +85,49 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                 fieldId: 'texttotal'
             });
             totalvalue = getInt(totalvalue);
+            //入金番号
             var id = currentRecord.getSublistValue({
                 sublistId: 'payment_sub_list',
                 fieldId: 'id',
                 line: line
             });
+            //入金日
             var paymentDate = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId : 'sub_list_4',
                 line : line 
             });
+            //
             var id = currentRecord.getSublistValue({
                 sublistId: 'payment_sub_list',
                 fieldId : 'id',
                 line : line 
             });
+            //得意先NO.
             var client = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId: 'sub_list_3',
                 line: line 
             });
+            //一致
             var match = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId: 'sub_list_10',
                 line: line 
             });
+            //消費税
             var consumption = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId: 'sub_list_11',
                 line: line 
             });
+            //手数料
             var fee = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId: 'sub_list_12',
                 line: line
             });
+
             if(check){
                 var matchField = currentRecord.getSublistField({ 
                     sublistId: 'payment_sub_list',
@@ -190,13 +199,19 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                     value: totalvalue
                 });
             }
-            var savingString = check+','+client+','+match+','+consumption+','+fee;
+            var savingString = {
+                'check':check,
+                'client':client,
+                'match':client,
+                'consumption':client,
+                'fee':client
+            };
 
             var id = record.submitFields({
                 type: 'customrecord_sii_custpayment',
                 id: id,
                 values: {
-                    custrecord_sii_custpayment_saving: savingString
+                    custrecord_sii_custpayment_saving: JSON.stringify(savingString)
                 }
             });
         }else{
@@ -236,6 +251,73 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                 });
             }
         }
+        //「一致」にフラグがあるときは、「消費税」「手数料」にフラグをつけられないようにする。
+      //また、「消費税」「手数料」にフラグがあるときは、「一致」にフラグをつけられないようにする
+      //※この3つにマークを付けると、「合計金額」が増えていく仕様になっているので修正。
+      if(scriptContext.fieldId === 'sub_list_10'){
+        var current_match = currentRecord.getSublistValue({
+          sublistId: 'payment_sub_list',
+          fieldId: 'sub_list_10',
+          line: line
+        });
+        if(current_match){
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_11',
+            line: line
+          }).isDisabled = true;
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_12',
+            line: line
+          }).isDisabled = true;
+        }else{
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_11',
+            line: line
+          }).isDisabled = false;
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_12',
+            line: line
+          }).isDisabled = false;
+        }
+      }
+      if(scriptContext.fieldId === 'sub_list_11' || scriptContext.fieldId === 'sub_list_12'){
+        var sub_list_11 = currentRecord.getSublistValue({
+          sublistId: 'payment_sub_list',
+          fieldId: 'sub_list_11',
+          line: line
+        });
+        var sub_list_12 = currentRecord.getSublistValue({
+          sublistId: 'payment_sub_list',
+          fieldId: 'sub_list_12',
+          line: line
+        });
+        if(sub_list_11 || sub_list_12){
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_10',
+            line: line
+          }).isDisabled = true;
+        }else {
+          currentRecord.getSublistField({
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_10',
+            line: line
+          }).isDisabled = false;
+        }
+      }
+      //「顧客」か「誤差認識差額」が変更されたとき、
+      // 「マッチング項目が変更されました。更新して情報を再取得しますか？」というメッセージを表示し、
+      //［はい］を押下されたときに、上の「更新」ボタンを押下した時と同様の処理をする。
+      //「顧客」が変更された場合は、選択された顧客から請求書を取得する。
+      if(scriptContext.fieldId === 'error_difference' || scriptContext.fieldId === 'sub_list_3'){
+          if (confirm('マッチング項目が変更されました。更新して情報を再取得しますか？')){
+            alert('ok clicked');
+          }
+      }
     }
 
     function checkDate(paymentDate, fromDate, toDate){
@@ -414,7 +496,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
     	
     }
 
-    function btnRunButton(recordId) {
+    function btnUpdateButton(recordId) {
         var output = url.resolveRecord({
             recordType: 'customrecord_sii_custpayment_h',
             recordId: recordId
@@ -436,7 +518,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
         btnReturnButton: btnReturnButton,
         btnSearchButton: btnSearchButton,
         btnClearButton: btnClearButton,
-        btnRunButton: btnRunButton
+        btnUpdateButton: btnUpdateButton
     };
     
 });

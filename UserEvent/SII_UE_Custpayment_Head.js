@@ -18,14 +18,42 @@ function(serverWidget,url,runtime,record, redirect, search) {
      */
     function beforeLoad(scriptContext) {
     	try{
+        if (scriptContext.type === scriptContext.UserEventType.VIEW){
+          var currentRecord = scriptContext.newRecord;
+          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
+          if(status === '1' || status === '5'){
+            var form = scriptContext.form;
+            form.addButton({
+              id : 'custpage_print_receipt',
+              label : '実行',
+              functionName: "btnExecutionButton("+currentRecord.id+");" 
+            });
+            form.clientScriptFileId = 7896;
+          }
+        }
     		if (scriptContext.type === scriptContext.UserEventType.EDIT){
-    		    var currentRecord = scriptContext.newRecord;
+          var currentRecord = scriptContext.newRecord;
+          /**
+           * //【ステータス変化】
+           * 1.入金データ取込済
+           →開始状態。入金管理票に移動可能。
+           2.自動消込実行中
+           →「実行」ボタン押下時。入金管理票に移動不可能。
+           3.自動消込完了
+           →仕訳、入金票生成完了時。入金管理票に移動不可能。
+           4.自動消込エラー
+           →仕訳生成及び入金票生成失敗時。入金管理票に移動可能。
+           */
+          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
+          if(status === '1' || status === '5'){
+            redirect.toSuitelet({
+              scriptId: 'customscript_sii_sl_paymentmanagement' ,
+              deploymentId: 'customdeploy_sii_sl_paymentmanagement',
+              parameters: {'custscript_custpayment_head_id': currentRecord.id}
+            });
+          }
     		    //log.debug('Record: ' + currentRecord.id);
-    			redirect.toSuitelet({
-    				scriptId: 'customscript_sii_sl_paymentmanagement' ,
-    				deploymentId: 'customdeploy_sii_sl_paymentmanagement',
-    				parameters: {'custscript_custpayment_head_id': currentRecord.id}
-    			});
+
     		}
             /*if(scriptContext.type === scriptContext.UserEventType.VIEW){
                 var form = scriptContext.form;
@@ -54,7 +82,7 @@ function(serverWidget,url,runtime,record, redirect, search) {
         try{
             if (scriptContext.type === scriptContext.UserEventType.CREATE){
                 var currentRecord = scriptContext.newRecord;
-                var customerArray = getCustomer()
+                var customerArray = getCustomer();
                 var numLines = currentRecord.getLineCount({
                     sublistId: 'recmachcustrecord_sii_custpayment_h_id'
                 });
@@ -132,7 +160,20 @@ function(serverWidget,url,runtime,record, redirect, search) {
      * @Since 2015.2
      */
     function afterSubmit(scriptContext) {
- 
+      try{
+        if (scriptContext.type === scriptContext.UserEventType.VIEW){
+          var currentRecord = scriptContext.newRecord;
+          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
+          if(status === '1' || status === '5'){
+            log.debug({
+              title: 'afterSubmit',
+              details: status
+            });
+          }
+        }
+      }catch (e){
+        log.error('UE afterSubmit :' + e);
+      }
     }
 
     function getCustomer(){

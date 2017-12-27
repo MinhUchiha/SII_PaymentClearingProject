@@ -59,14 +59,23 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     displayType : serverWidget.FieldDisplayType.HIDDEN
                 });
                 head_id.defaultValue = custpayment_h_id;
+                var payment_id = form.addField({
+                    id: 'payment_id',
+                    label: 'ID : ',
+                    type: serverWidget.FieldType.TEXT
+                });
+                payment_id.updateDisplayType({
+                    displayType : serverWidget.FieldDisplayType.HIDDEN
+                });
+                payment_id.defaultValue = recordId;
 
-                var savingArray = [];
                 if(saving != '' && saving != null){
-                    savingArray = saving.split(",");
+                    var saveCustomer = JSON.parse(saving).client;
+                    if(saveCustomer != '' && saveCustomer != null){
+                        customer = saveCustomer;
+                    }
                 }
-                if(savingArray.length > 0){
-                    customer = savingArray[1];
-                }
+
                 //顧客
                 var customerField = form.addField({
                     id: 'customer',
@@ -127,7 +136,25 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     calculation_error.defaultValue = consumptionParameters;
                 }
 
-                var subtab = form.addSubtab({
+              //適用可能額
+              var applicable_amount = form.addField({
+                id: 'applicable_amount',
+                label: '適用可能額',
+                type: serverWidget.FieldType.TEXT
+              });
+
+              applicable_amount.defaultValue = format.format({
+                value: paymentamo,
+                type: format.Type.INTEGER
+              });
+              applicable_amount.updateLayoutType({
+                layoutType: serverWidget.FieldLayoutType.STARTROW
+              });
+              applicable_amount.updateDisplayType({
+                displayType: serverWidget.FieldDisplayType.DISABLED
+              });
+
+              var subtab = form.addSubtab({
                         id : 'custpage_subtab',
                         label : '請求書一覧'
                 });
@@ -151,9 +178,20 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     label: '請求番号'
                 });
                 invoiceSubList.addField({
+                    id: 'id',
+                    type: serverWidget.FieldType.TEXT,
+                    label: 'invoiceID'
+                });
+                invoiceSubList.addField({
                     id: 'sub_list_1',
                     type: serverWidget.FieldType.DATE,
                     label: '期日'
+                });
+                invoiceSubList.addField({
+                    id: 'entity',
+                    type: serverWidget.FieldType.SELECT,
+                    source: 'account',
+                    label: '勘定科目'
                 });
                 invoiceSubList.addField({
                     id: 'sub_list_2',
@@ -214,17 +252,30 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     var amount = result.getValue(invoiceList.columns[3]);
                     var amountremaining = result.getValue(invoiceList.columns[4]);
                     var department = result.getText(invoiceList.columns[6]);
+                    var entity = result.getValue(invoiceList.columns[8]);
                     if(invoiceCustomer == customer ){
                         invoiceSubList.setSublistValue({
                             id: 'sub_list_id',
                             line: i,
                             value: tranid
                         });
+                        invoiceSubList.setSublistValue({
+                            id: 'id',
+                            line: i,
+                            value: result.id
+                        });
                         if(duedate != null && duedate != ''){
                             invoiceSubList.setSublistValue({
                                 id: 'sub_list_1',
                                 line: i,
                                 value: duedate
+                            });
+                        }
+                        if(entity != null && entity != ''){
+                            invoiceSubList.setSublistValue({
+                                id: 'entity',
+                                line: i,
+                                value: entity
                             });
                         }
                         if(department != '' && department != null){
@@ -299,11 +350,99 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                 form.clientScriptFileId = clientScriptFileId;
                 context.response.writePage(form);
             }else{
-                var id = context.request.parameters.head_id;
+                var serverRequest = context.request;
+                var lines = serverRequest.getLineCount({ group: "invoice_sub_list" });
+                var  array = [];
+                for(var i = 0; i < lines; i++){
+                    var id = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'id',
+                        line: i
+                    });
+                    var check = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_check',
+                        line: i
+                    });
+                    var applied = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_4',
+                        line: i
+                    });
+                    var adjustment = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_5',
+                        line: i
+                    });
+                    var check_2 = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_6',
+                        line: i
+                    });
+                    var account = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_8',
+                        line: i
+                    });
+                    var taxco = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_9',
+                        line: i
+                    });
+                    var taxCaSetting = serverRequest.getSublistValue({
+                        group: 'invoice_sub_list',
+                        name: 'sub_list_10',
+                        line: i
+                    });
+                    var jsonSave = {
+                        "id":id,
+                        "check":check,
+                        "applied":applied,
+                        "adjustment":adjustment,
+                        "check_2":check_2,
+                        "account":account,
+                        "taxco":taxco,
+                        "taxCaSetting":taxCaSetting
+                    };
+                    array.push(jsonSave);
+                }
+
+                var payment_id = serverRequest.parameters.payment_id;
+                var objRecord = record.load({
+                    type: 'customrecord_sii_custpayment',
+                    id: payment_id
+                });
+                var saving = objRecord.getValue({
+                    fieldId: 'custrecord_sii_custpayment_saving'
+                });
+                if(saving != '' && saving != null){
+                    saving = JSON.parse(saving);
+                    saving.invoice = array;
+                }else{
+                    saving = {
+                        "invoice": array
+                    };
+                }
+                record.submitFields({
+                    type: 'customrecord_sii_custpayment',
+                    id: payment_id,
+                    values: {
+                        custrecord_sii_custpayment_saving: JSON.stringify(saving)
+                    }
+                });
+                var customer = serverRequest.parameters.customer;
+                record.submitFields({
+                    type: 'customrecord_sii_custpayment',
+                    id: payment_id,
+                    values: {
+                        custrecord_sii_custpayment_client: customer
+                    }
+                });
+                var head_id = serverRequest.parameters.head_id;
                 redirect.toSuitelet({
                     scriptId: 'customscript_sii_sl_paymentmanagement' ,
                     deploymentId: 'customdeploy_sii_sl_paymentmanagement',
-                    parameters: {'custscript_custpayment_head_id': id}
+                    parameters: {'custscript_custpayment_head_id': head_id}
                 });
             }
         }catch(e){

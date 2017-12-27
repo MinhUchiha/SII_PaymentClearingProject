@@ -28,6 +28,52 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 line: i 
             });
             no_applicable.isDisabled = true;
+          /**
+           * 【「調整額」が空欄のとき】
+           「費用勘定科目」「消費税」「消費税カテゴリ」を表示しない
+           ＝調整額に値があるときは表示する
+           or
+           「費用勘定科目」「消費税」「消費税カテゴリ」をグレーアウト
+           ＝調整額に値があるときはグレーアウトを解除
+           */
+          var ajust_mount = currentRecord.getSublistValue({
+            sublistId: 'invoice_sub_list',
+            fieldId: 'sub_list_5',
+            line: i
+          });
+          if(ajust_mount === null || ajust_mount === ''){
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_8',
+              line: i
+            }).isDisabled = true;
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_9',
+              line: i
+            }).isDisabled = true;
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_10',
+              line: i
+            }).isDisabled = true;
+          }else {
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_8',
+              line: i
+            }).isDisabled = false;
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_9',
+              line: i
+            }).isDisabled = false;
+            currentRecord.getSublistField({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_10',
+              line: i
+            }).isDisabled = false;
+          }
         }
     }
 
@@ -47,7 +93,62 @@ function(dialog,currentRecord,search,message,file,record,format) {
         var currentRecord = scriptContext.currentRecord;
         var line = scriptContext.line;
         if(line != null){
-            if(scriptContext.fieldId == 'sub_list_6'){
+          if(scriptContext.fieldId === 'sub_list_5') {
+            /**
+             * 【「調整額」が空欄のとき】
+             「費用勘定科目」「消費税」「消費税カテゴリ」を表示しない
+             ＝調整額に値があるときは表示する
+             or
+             「費用勘定科目」「消費税」「消費税カテゴリ」をグレーアウト
+             ＝調整額に値があるときはグレーアウトを解除
+             */
+            var ajust_mount = currentRecord.getSublistValue({
+              sublistId: 'invoice_sub_list',
+              fieldId: 'sub_list_5',
+              line: line
+            });
+            if (ajust_mount === null || ajust_mount === '') {
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_8',
+                line: line
+              }).isDisabled = true;
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_9',
+                line: line
+              }).isDisabled = true;
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_10',
+                line: line
+              }).isDisabled = true;
+            } else {
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_8',
+                line: line
+              }).isDisabled = false;
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_9',
+                line: line
+              }).isDisabled = false;
+              currentRecord.getSublistField({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_10',
+                line: line
+              }).isDisabled = false;
+            }
+             //「調整額」に入力した数値は「合計」に加算する
+            var total_text = currentRecord.getField({fieldId:'total_text'});
+            var paymentamo = 10;
+            total_text.defaultValue = format.format({
+              value: paymentamo,
+              type: format.Type.INTEGER
+            });
+          }
+            if(scriptContext.fieldId === 'sub_list_6'){
                 var check = currentRecord.getSublistValue({ 
                     sublistId: 'invoice_sub_list',
                     fieldId : 'sub_list_6',
@@ -80,7 +181,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 }
                 if(check){
                     for(i = 0; i < numLines; i++){
-                        if(i != line){
+                        if(i !== line){
                             var checkLine = currentRecord.getSublistValue({ 
                                 sublistId: 'invoice_sub_list',
                                 fieldId : 'sub_list_6',
@@ -361,7 +462,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
     	
     }
     function btnReturnButton() {
-    	window.close();
+    	window.history.go(-1);
     }
 
     return {

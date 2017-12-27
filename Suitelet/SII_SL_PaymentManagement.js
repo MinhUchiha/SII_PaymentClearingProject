@@ -18,7 +18,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
     function onRequest(context) {
         try{
             var scriptObj = runtime.getCurrentScript();
-            var clientScriptFileId = scriptObj.getParameter({name: 'custscript_paymentmanagement_client_file'})
+            var clientScriptFileId = scriptObj.getParameter({name: 'custscript_paymentmanagement_client_file'});
             var request = context.request;
             var recordId = request.parameters.custscript_custpayment_head_id;
             if (request.method === http.Method.GET) {
@@ -86,11 +86,12 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'cancelButton',
                     label: 'キャンセル',
                     functionName: 'window.history.go(-1);'
-                }); 
+                });
+                //入金管理票から「実行」ボタンを削除する。代わりに、「更新」ボタンを追加する。
                 form.addButton({
-                    id: 'runButton',
-                    label: '実行',
-                    functionName: 'btnRunButton('+recordId+');'
+                    id: 'updateButton',
+                    label: '更新',
+                    functionName: 'btnUpdateButton('+recordId+');'
                 });
 
                 //id
@@ -133,11 +134,13 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     label: 'ステータス',
                     type: serverWidget.FieldType.TEXT
                 });
-                if(status == 2){
-                    textStatus.defaultValue = "取込失敗";
-                }else{
-                    textStatus.defaultValue = "正常取込";
-                }
+                //ステータスの値は入金票ヘッダーから持ってくる。
+              var import_status = record.load({
+                type: 'customlist_sii_custpayment_status_list',
+                id: status
+              });
+              textStatus.defaultValue = import_status.getValue({fieldId: 'name'});
+
                 textStatus.updateDisplayType({
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
@@ -243,6 +246,12 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     label: '債権合計'
                 });
                 paymentSubList.addField({
+                    id: 'feeid',
+                    type: serverWidget.FieldType.TEXT,
+                    label: 'ID'
+                }).updateDisplayType({
+                    displayType : serverWidget.FieldDisplayType.HIDDEN});
+                paymentSubList.addField({
                     id: 'sub_list_10',
                     type: serverWidget.FieldType.CHECKBOX,
                     label: '一致'
@@ -319,7 +328,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     var fee = result.getValue({
                         name: 'custrecord_sii_custpayment_fee'
                     });
-                    var feeId;
+                    var feeSum;
+                    var feeID;
                     var erorrParam;
                     if(claimsum == paymentamo){
                         match = true;
@@ -329,7 +339,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             var sumFee = result.getValue({name: 'custrecord_sii_custfee_sum'});
                             if(sumFee == erorr){
                                 fee = true;
-                                feeId = sumFee;              
+                                feeSum = sumFee;
+                                feeID = result.id;         
                             }else{
                                 if(Math.abs(erorr) <= saveError){
                                     consumption = true;
@@ -339,7 +350,8 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                                     consumption = true;
                                     fee = true;
                                     erorrParam = erorr - sumFee;
-                                    feeId = sumFee;
+                                    feeSum = sumFee;
+                                    feeID = result.id;
                                 }
                             }
                         
@@ -351,6 +363,13 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                         line: i,
                         value: result.id
                     });
+                    if(feeID != null && feeID != ''){
+                        paymentSubList.setSublistValue({
+                            id: 'feeid',
+                            line: i,
+                            value: feeID
+                        });
+                    }
                     if(exclusion){
                         paymentSubList.setSublistValue({
                             id: 'sub_list_check',
@@ -375,13 +394,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             'custscript_custpayment_id': result.id,
                             'match': match,
                             'consumption': erorrParam,
-                            'fee': feeId
+                            'fee': feeSum
                         }
                     });
                     paymentSubList.setSublistValue({
                         id: 'sub_list_id',
                         line: i,
-                        value: '<a href=\'#\' onClick="MyWindow=window.open(\''+output+'\',\'\',\'width=1400,height=700\'); return false;">'+sub_list_id+'</a>'
+                        value: '<a href="'+output+'">'+sub_list_id+'</a>'
+                        /*value: '<a href=\'#\' onClick="MyWindow=window.open(\''+output+'\',\'\',\'width=1400,height=700\'); return false;">'+sub_list_id+'</a>'*/
                     });
                     if(customerno == null || customerno == ''){
                         paymentSubList.setSublistValue({
@@ -931,6 +951,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             },{
                 name: 'custrecord_sii_custfee_sum'
             }]
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
+    }
+
+    function getInvoiceList(){
+        var mysearch = search.load({
+            id: 'customsearch_custpayment_invoice_detail'
         });
         var resultSet = mysearch.run();
         return( resultSet );

@@ -12,6 +12,7 @@
     <folder name="Suitelet" bundleable="false">
       <file name="SII_SL_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_SL_PaymentAdjustment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_SL_PaymentExecution.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_SL_PaymentManagement.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
     </folder>
     <folder name="UserEvent" bundleable="false">
