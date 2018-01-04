@@ -3,9 +3,9 @@
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
  */
-define(['N/ui/serverWidget','N/http','N/record','N/search','N/redirect','N/format', 'N/runtime', 'N/url'],
+define(['N/ui/serverWidget','N/http','N/record','N/search','N/redirect','N/format', 'N/runtime', 'N/url', 'N/task'],
 
-function(serverWidget, http, record, search, redirect, format, runtime, url) {
+function(serverWidget, http, record, search, redirect, format, runtime, url, task) {
    
     /**
      * Definition of the Suitelet script trigger point.
@@ -17,7 +17,24 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
      */
     function onRequest(context) {
         try{
-            var scriptObj = runtime.getCurrentScript();
+            var request = context.request;
+            var recordId = request.parameters.custscript_custpayment_head_id;
+            var scriptTask = task.create({taskType: task.TaskType.SCHEDULED_SCRIPT});
+            scriptTask.scriptId = 'customscript_sii_ss_create_journal_custp';
+            scriptTask.deploymentId = 'customdeploy_sii_ss_create_journal_custp';
+            scriptTask.params = {custscripthead_id: recordId};
+            var scriptTaskId = scriptTask.submit();
+            var taskStatus = task.checkStatus(scriptTaskId);
+            log.debug({
+                title: 'taskStatus',
+                details: taskStatus
+            });
+            redirect.toRecord({
+                type : 'customrecord_sii_custpayment_h',
+                id : recordId,
+                parameters: {'custscript_check_message': true}
+            });
+            /*var scriptObj = runtime.getCurrentScript();
             var request = context.request;
             var recordId = request.parameters.custscript_custpayment_head_id;
             if (request.method === http.Method.GET) {
@@ -45,236 +62,16 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 context.response.writePage(form);
             }else{
                 var id = context.request.parameters.head_id;
-                var headRecord = record.load({
-                    type : 'customrecord_sii_custpayment_h',
-                    id : id
-                });
-                var nowDate = new Date();
-                var numLines = headRecord.getLineCount({
-                    sublistId: 'recmachcustrecord_sii_custpayment_h_id'
-                });
-                var feeList = getFee();
-                for(var i = 0; i < numLines; i++ ){
-                    var entityid = headRecord.getSublistValue({
-                        sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                        fieldId: 'custrecord_sii_custpayment_client',
-                        line: i
-                    });
-                    var saving = headRecord.getSublistValue({
-                        sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                        fieldId: 'custrecord_sii_custpayment_saving',
-                        line: i
-                    });
-                    if(saving != '' && saving != null){
-                        saving = JSON.parse(saving);
-                        if(saving.invoice != '' && saving.invoice != null){
-                            invoicesArray = saving.invoice;
-                            var customerPaymentRecord = record.transform({
-                                fromType: 'invoice',
-                                fromId: invoicesArray[0].id,
-                                toType: 'customerpayment'
-                            });
-                            var sum = 0;
-                            if(invoicesArray[0].check == 'T'){
-                                sum = invoicesArray[0].applied
-                            }
-                            for(var j =1; j < invoicesArray.length; j++){
-                                var invoiceRecord = record.load({
-                                    type: 'invoice',
-                                    id: invoicesArray[j].id
-                                })
-                                customerPaymentRecord.setSublistValue({
-                                    sublistId: 'apply',
-                                    fieldId: 'internalid',
-                                    line: j,
-                                    value: invoiceRecord.id
-                                })
-                                customerPaymentRecord.setSublistValue({
-                                    sublistId: 'apply',
-                                    fieldId: 'amount',
-                                    line: j,
-                                    value: invoiceRecord.getValue({fieldId: 'total'})
-                                });
-                                customerPaymentRecord.setSublistValue({
-                                    sublistId: 'apply',
-                                    fieldId: 'applydate',
-                                    line: j,
-                                    value: invoiceRecord.getValue({fieldId: 'saleseffectivedate'})
-                                });
-                                if(invoicesArray[j].check == 'T'){
-                                    customerPaymentRecord.setSublistValue({
-                                        sublistId: 'apply',
-                                        fieldId: 'apply',
-                                        line: j,
-                                        value: true
-                                    })
-                                    sum += invoiceRecord.getValue({fieldId: 'total'})
-                                }
-                            }
-                            var newJournalRecord = record.create({
-                                type: 'journalentry'
-                            });
-                            newJournalRecord.setValue({
-                                fieldId: 'trandate',
-                                value: nowDate
-                            });
-                            newJournalRecord.setValue({
-                                fieldId: 'currency',
-                                value: 1
-                            });
-                            newJournalRecord.setValue({
-                                fieldId: 'exchangerate',
-                                value: 1
-                            });
-                            var subsidiary = newJournalRecord.getValue({
-                                fieldId: 'subsidiary',
-                                value: 1
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'account',
-                                line: 0,
-                                value: 332
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'entity',
-                                line: 0,
-                                value: 230
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'credit',
-                                line: 0,
-                                value: 540
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'account',
-                                line: 1,
-                                value: 330
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'entity',
-                                line: 1,
-                                value: 230
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'debit',
-                                line: 1,
-                                value: 500
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'grossamt',
-                                line: 1,
-                                value: 540
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'tax1acct',
-                                line: 1,
-                                value: 224
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'tax1amt',
-                                line: 1,
-                                value: 40
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'taxcode',
-                                line: 1,
-                                value: 18
-                            });
-                            newJournalRecord.setSublistValue({
-                                sublistId: 'line',
-                                fieldId: 'taxrate1',
-                                line: 1,
-                                value: 8
-                            });
-                            newJournalRecord.save();
-                            /*customerPaymentRecord.setValue({
-                                fieldId: 'payment',
-                                value: sum
-                            })*/
-                            customerPaymentRecordId = customerPaymentRecord.save();
-                        }
-                    }
-                }
-                /*
-                var newJournalRecord = record.create({
-                    type: 'journalentry'
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'account',
-                    line: 0,
-                    value: 330
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'entity',
-                    line: 0,
-                    value: 230
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'credit',
-                    line: 0,
-                    value: 540
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'account',
-                    line: 1,
-                    value: 332
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'entity',
-                    line: 1,
-                    value: 230
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'debit',
-                    line: 1,
-                    value: 500
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'tax1amt',
-                    line: 1,
-                    value: 40
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'taxrate1',
-                    line: 1,
-                    value: 8
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'grossamt',
-                    line: 1,
-                    value: 540
-                });
-                newJournalRecord.setSublistValue({
-                    sublistId: 'line',
-                    fieldId: 'tax1acct',
-                    line: 1,
-                    value: 224
-                });
-                newJournalRecord.save();*/
+                var scriptTask = task.create({taskType: task.TaskType.SCHEDULED_SCRIPT});
+                scriptTask.scriptId = 'customscript_sii_ss_create_journal_custp';
+                scriptTask.deploymentId = 'customdeploy_sii_ss_create_journal_custp';
+                scriptTask.params = {custscripthead_id: id};
+                var scriptTaskId = scriptTask.submit();
                 redirect.toRecord({
                     type : 'customrecord_sii_custpayment_h',
                     id : id
                 });
-            }      
+            }      */
         }catch(e){
             log.error({
                 title: e.name,
@@ -283,6 +80,208 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         }
     }
 
+    function createJournal(invoiceAccount, client, erorrParam, savePlus, saveAcc, feeSum, feeBase, saveTaxCo){
+        var nowDate = new Date();
+        var newJournalRecord = record.create({
+            type: 'journalentry'
+        });
+        var id;
+        if(!!isEmpty(erorrParam)){
+            newJournalRecord.setValue({
+                fieldId: 'trandate',
+                value: nowDate
+            });
+            newJournalRecord.setValue({
+                fieldId: 'currency',
+                value: 1
+            });
+            newJournalRecord.setValue({
+                fieldId: 'exchangerate',
+                value: 1
+            });
+            newJournalRecord.setValue({
+                fieldId: 'subsidiary',
+                value: 1
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                line: 0,
+                value: invoiceAccount
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'entity',
+                line: 0,
+                value: client
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                line: 0,
+                value: parseInt(feeSum)+parseInt(erorrParam)
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                line: 1,
+                value: savePlus
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'entity',
+                line: 1,
+                value: client
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                line: 1,
+                value: erorrParam
+            });
+            /*newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'grossamt',
+                line: 1,
+                value: erorrParam
+            });*/
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                line: 2,
+                value: saveAcc
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'entity',
+                line: 2,
+                value: client
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                line: 2,
+                value: feeBase
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'grossamt',
+                line: 2,
+                value: feeSum
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'tax1acct',
+                line: 2,
+                value: 224
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'tax1amt',
+                line: 2,
+                value: feeSum - feeBase
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'taxcode',
+                line: 2,
+                value: saveTaxCo
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'taxrate1',
+                line: 2,
+                value: 8
+            });
+            id = newJournalRecord.save();
+        }else{
+            newJournalRecord.setValue({
+                fieldId: 'trandate',
+                value: nowDate
+            });
+            newJournalRecord.setValue({
+                fieldId: 'currency',
+                value: 1
+            });
+            newJournalRecord.setValue({
+                fieldId: 'exchangerate',
+                value: 1
+            });
+            newJournalRecord.setValue({
+                fieldId: 'subsidiary',
+                value: 1
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                line: 0,
+                value: invoiceAccount
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'entity',
+                line: 0,
+                value: client
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'credit',
+                line: 0,
+                value: feeSum
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'account',
+                line: 1,
+                value: saveAcc
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'entity',
+                line: 1,
+                value: client
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'debit',
+                line: 1,
+                value: feeBase
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'grossamt',
+                line: 1,
+                value: feeSum
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'tax1acct',
+                line: 1,
+                value: 224
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'tax1amt',
+                line: 1,
+                value: feeSum - feeBase
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'taxcode',
+                line: 1,
+                value: saveTaxCo
+            });
+            newJournalRecord.setSublistValue({
+                sublistId: 'line',
+                fieldId: 'taxrate1',
+                line: 1,
+                value: 8
+            });
+            id = newJournalRecord.save();
+        }
+        
+        return( id );
+    }
     function getPaymentList(paymentListHeadId){
         var myPaymentListSearch = search.create({
             type: 'customrecord_sii_custpayment',
@@ -374,6 +373,9 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 name: 'name'
             },{
                 name: 'custrecord_sii_custfee_sum'
+            },
+            {
+                name: 'custrecord_sii_custfee_base'
             }]
         });
         var resultSet = mysearch.run();

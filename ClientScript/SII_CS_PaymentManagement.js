@@ -202,9 +202,9 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             var savingString = {
                 'check':check,
                 'client':client,
-                'match':client,
-                'consumption':client,
-                'fee':client
+                'match':match,
+                'consumption':consumption,
+                'fee':fee
             };
 
             var id = record.submitFields({
@@ -313,11 +313,11 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
       // 「マッチング項目が変更されました。更新して情報を再取得しますか？」というメッセージを表示し、
       //［はい］を押下されたときに、上の「更新」ボタンを押下した時と同様の処理をする。
       //「顧客」が変更された場合は、選択された顧客から請求書を取得する。
-      if(scriptContext.fieldId === 'error_difference' || scriptContext.fieldId === 'sub_list_3'){
-          if (confirm('マッチング項目が変更されました。更新して情報を再取得しますか？')){
-            alert('ok clicked');
-          }
-      }
+      // if(scriptContext.fieldId === 'error_difference' || scriptContext.fieldId === 'sub_list_3'){
+      //     if (confirm('マッチング項目が変更されました。更新して情報を再取得しますか？')){
+      //       alert('ok clicked');
+      //     }
+      // }
     }
 
     function checkDate(paymentDate, fromDate, toDate){
@@ -497,11 +497,12 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
     }
 
     function btnUpdateButton(recordId) {
-        var output = url.resolveRecord({
+        location.reload();
+        /*var output = url.resolveRecord({
             recordType: 'customrecord_sii_custpayment_h',
             recordId: recordId
         });
-        window.open(output);
+        window.open(output);*/
     }
 
     return {

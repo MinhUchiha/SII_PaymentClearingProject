@@ -20,12 +20,15 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
             var scriptObj = runtime.getCurrentScript();
             var clientScriptFileId = scriptObj.getParameter({name: 'custscript_paymentmanagement_client_file'});
             var request = context.request;
+
             var recordId = request.parameters.custscript_custpayment_head_id;
+
             if (request.method === http.Method.GET) {
                 var objRecord = record.load({
                     type: 'customrecord_sii_custpayment_h',
                     id: recordId
                 });
+
                 var importDate = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_importdate'});
                 /*importDate = format.format({
                     value: importDate,
@@ -631,12 +634,12 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 tax_category_label.updateBreakType({
                     breakType: serverWidget.FieldBreakType.STARTROW
                 });
- 
+                //カスタムレコード「customrecord_4572_tax_category」からリスト値を取得
                 var tax_category = form.addField({
                     id: 'tax_category',
                     label: 'tax_category',
                     type: serverWidget.FieldType.SELECT,
-                    source: 'customlist_4572_main_tax_category',
+                    source: 'customrecord_4572_tax_category',
                     container: 'commission'
                 });
                     
@@ -845,6 +848,145 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     value: minus_error
                 });
                 saveRecord.save();
+                var lines = context.request.getLineCount({ group: "payment_sub_list" });
+                for(var i=0; i< lines; i++){
+                    var paymentId = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'id',
+                        line: i
+                    });
+                    var check = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'sub_list_check',
+                        line: i
+                    });
+                    record.submitFields({
+                        type: 'customrecord_sii_custpayment',
+                        id: paymentId,
+                        values: {
+                            custrecord_sii_custpayment_exclusion: check
+                        }
+                    });
+                }
+                /*if(aracct!= null && aracct!= ''){
+                    var customerPaymentRecord = record.transform({
+                        fromType: 'invoice',
+                        fromId: invoidRecordID,
+                        toType: 'customerpayment'
+                    });
+                    var customerPaymentRecord = record.create({
+                        type: 'customerpayment'
+                    });
+                    customerPaymentRecord.setValue({
+                        fieldId: 'currency',
+                        value: 1
+                    });
+                    customerPaymentRecord.setValue({
+                        fieldId: 'exchangerate',
+                        value: 1
+                    });
+                    customerPaymentRecord.setValue({
+                        fieldId: 'payment',
+                        value: 3430332   
+                    });
+                    customerPaymentRecord.setValue({
+                        fieldId: 'aracct',
+                        value: aracct
+                    });
+                    customerPaymentRecord.setValue({
+                        fieldId: 'trandate',
+                        value: nowDate
+                    });
+                    customerPaymentRecord.setSublistValue({
+                        sublistId: 'apply',
+                        fieldId: 'apply',
+                        line: 0,
+                        value: true
+                    });
+                    customerPaymentRecord.setSublistValue({
+                        sublistId: 'apply ',
+                        fieldId: 'amount',
+                        line: 0,
+                        value: 10000
+                    });
+                    customerPaymentRecord.setSublistValue({
+                        sublistId: 'apply',
+                        fieldId: 'applydate',
+                        line: 0,
+                        value: nowDate
+                    });
+                    customerPaymentRecord.save();
+                }
+                if(fee == 'T'){
+                    var newJournalRecord = record.create({
+                        type: 'journalentry'
+                    });
+                    var numLines = newJournalRecord.getLineCount({
+                        sublistId: 'line'
+                    });
+                    var custfee = record.load({
+                        type: 'customrecord_sii_custfee',
+                        id: feeid
+                    });
+                    var custfee_base = custfee.getValue({
+                        fieldId: 'custrecord_sii_custfee_base'
+                    });
+                    var custfee_tax = custfee.getValue({
+                        fieldId: 'custrecord_sii_custfee_tax'
+                    })
+                    newJournalRecord.setSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'account',
+                        line: 0,
+                        value: fee_account_item
+                    });
+                    newJournalRecord.setSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'debit',
+                        line: 0,
+                        value: 3430332
+                    });
+                    newJournalRecord.setSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'linetaxcode',
+                        line: 0,
+                        value: tax_code
+                    });
+                    newJournalRecord.setSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'account',
+                        line: 1,
+                        value: fee_account_item
+                    });
+                    newJournalRecord.setSublistValue({
+                        sublistId: 'line',
+                        fieldId: 'credit',
+                        line: 1,
+                        value: 3430332
+                    });
+                    newJournalRecord.save();
+                }
+                var invoiceList = getInvoiceList();
+                var aracct;
+                var invoidRecordID;
+                invoiceList.each(function(result) {
+                    var invoiceCustomer = result.getValue(invoiceList.columns[0]);
+                    var tranid = result.getValue(invoiceList.columns[2]);
+                    var duedate = result.getValue(invoiceList.columns[7]);
+                    var amount = result.getValue(invoiceList.columns[3]);
+                    var amountremaining = result.getValue(invoiceList.columns[4]);
+                    var department = result.getText(invoiceList.columns[6]);
+                    var entity = result.getValue(invoiceList.columns[8]);
+                    if(invoiceCustomer == customer ){
+                        aracct = entity;
+                        invoidRecordID = result.id;
+                    }
+                    return true;
+                });
+                log.debug({
+                    title: 'aracct',
+                    details: customer+" "+aracct+invoiceList.columns[8].name
+                })*/
                 redirect.toRecord({
                     type : 'customrecord_sii_custpayment_h',
                     id : id

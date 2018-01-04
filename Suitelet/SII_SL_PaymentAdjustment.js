@@ -19,19 +19,31 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
         try{
             var request = context.request;
             if (request.method === http.Method.GET) {
-                var recordId = request.parameters.custscript_custpayment_id;
-                var feeParameters = request.parameters.fee;
-                var consumptionParameters = request.parameters.consumption;
+              //Get parameter
+              var recordId = request.parameters.custscript_custpayment_id;
+              var feeParameters = request.parameters.fee;
+              var consumptionParameters = request.parameters.consumption;
+
                 var objRecord = record.load({
                     type: 'customrecord_sii_custpayment',
                     id: recordId
                 });
                 var scriptObj = runtime.getCurrentScript();
-                var clientScriptFileId = scriptObj.getParameter({name: 'custscript_paymentadjustment_client_file'});
-                var customer = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_client'});
-                var paymentamo = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_paymentamo'});
-                var custpayment_h_id = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_h_id'});
-                var saving = objRecord.getValue({fieldId: 'custrecord_sii_custpayment_saving'});
+                var clientScriptFileId = scriptObj.getParameter({
+                  name: 'custscript_paymentadjustment_client_file'
+                });
+                var customer = objRecord.getValue({
+                  fieldId: 'custrecord_sii_custpayment_client'
+                });
+                var paymentamo = objRecord.getValue({
+                  fieldId: 'custrecord_sii_custpayment_paymentamo'
+                });
+                var custpayment_h_id = objRecord.getValue({
+                  fieldId: 'custrecord_sii_custpayment_h_id'
+                });
+                var saving = objRecord.getValue({
+                  fieldId: 'custrecord_sii_custpayment_saving'
+                });
                 // フォーム定義
                 var form = serverWidget.createForm({
                     title: '入金票差額調整'
@@ -143,10 +155,6 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                 type: serverWidget.FieldType.TEXT
               });
 
-              applicable_amount.defaultValue = format.format({
-                value: paymentamo,
-                type: format.Type.INTEGER
-              });
               applicable_amount.updateLayoutType({
                 layoutType: serverWidget.FieldLayoutType.STARTROW
               });
@@ -253,7 +261,7 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     var amountremaining = result.getValue(invoiceList.columns[4]);
                     var department = result.getText(invoiceList.columns[6]);
                     var entity = result.getValue(invoiceList.columns[8]);
-                    if(invoiceCustomer == customer ){
+                    if(invoiceCustomer === customer ){
                         invoiceSubList.setSublistValue({
                             id: 'sub_list_id',
                             line: i,
@@ -264,7 +272,7 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                             line: i,
                             value: result.id
                         });
-                        if(duedate != null && duedate != ''){
+                        if(duedate != null && duedate !== ''){
                             invoiceSubList.setSublistValue({
                                 id: 'sub_list_1',
                                 line: i,
@@ -346,10 +354,13 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                     }
                     return true;
                 });
-
+                applicable_amount.defaultValue = format.format({
+                    value: paymentamo,
+                    type: format.Type.INTEGER
+                });
                 form.clientScriptFileId = clientScriptFileId;
                 context.response.writePage(form);
-            }else{
+            }else{//POST
                 var serverRequest = context.request;
                 var lines = serverRequest.getLineCount({ group: "invoice_sub_list" });
                 var  array = [];
@@ -438,11 +449,18 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
                         custrecord_sii_custpayment_client: customer
                     }
                 });
+              // 合計を入金管理票「入金額」にセット
+              var paymentamo = serverRequest.parameters.total_text;
+              paymentamo = getInt(paymentamo);
+              setPaymentAmount(payment_id, paymentamo);
+
                 var head_id = serverRequest.parameters.head_id;
                 redirect.toSuitelet({
                     scriptId: 'customscript_sii_sl_paymentmanagement' ,
                     deploymentId: 'customdeploy_sii_sl_paymentmanagement',
-                    parameters: {'custscript_custpayment_head_id': head_id}
+                    parameters: {
+                      'custscript_custpayment_head_id': head_id
+                    }
                 });
             }
         }catch(e){
@@ -460,6 +478,36 @@ function(serverWidget, http, record, search, redirect, format, runtime) {
         var resultSet = mysearch.run();
         return( resultSet );
     }
+
+  /**
+   *合計を入金管理票「入金額」にセット
+   * @param paymentListDetailId
+   * @param payment_summary
+   */
+  function setPaymentAmount(paymentListDetailId, payment_summary) {
+    var id = record.submitFields({
+      type: 'customrecord_sii_custpayment',
+      id: paymentListDetailId,
+      values: {
+        custrecord_sii_custpayment_paymentamo: payment_summary
+      }
+    });
+  }
+
+  /**
+   * 123,456,789 -> 123456789
+   * @param stringNumber
+   * @returns {number | *}
+   */
+  function getInt(stringNumber){
+    stringNumber = stringNumber.split(",");
+    var stringtotal = '';
+    stringNumber.forEach(function(item, index){
+      stringtotal = stringtotal+item;
+    });
+    stringNumber = parseInt(stringtotal);
+    return stringNumber;
+  }
 
     return {
         onRequest: onRequest

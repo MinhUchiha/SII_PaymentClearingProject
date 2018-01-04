@@ -4,11 +4,14 @@
       <file name="SII_CS_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_CS_PaymentAdjustment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_CS_PaymentManagement.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+      <file name="SII_CS_PaymentView.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
     </folder>
     <folder name="Common" bundleable="false">
       <file name="SII_PL_Common.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
     </folder>
-    <folder name="Schedule" bundleable="false"/>
+    <folder name="Schedule" bundleable="false">
+      <file name="SII_SS_Create_Journal_CustPay.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
+    </folder>
     <folder name="Suitelet" bundleable="false">
       <file name="SII_SL_Import_CSV_Array.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>
       <file name="SII_SL_PaymentAdjustment.js" bundleable="false" hideInBundle="false" isOnline="false" textFileEncoding="_shiftJis"/>

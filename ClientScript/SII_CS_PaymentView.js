@@ -17,7 +17,6 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
      * @since 2015.2
      */
     function pageInit(scriptContext) {
-
     }
 
     /**
@@ -212,20 +211,28 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
     	
     }
 
-    function btnUpdateButton(recordId) {
-
+    function btnUpdateButton() {
+        location.reload();
     }
 
     function btnExecutionButton(recordId) {
-      var output = url.resolveScript({
+
+        var id = record.submitFields({
+            type: 'customrecord_sii_custpayment_h',
+            id: recordId,
+            values: {
+                custrecord_sii_custpayment_status: 3
+            }
+        });
+        var output = url.resolveScript({
         scriptId: 'customscript_sii_sl_paymentexecution',
         deploymentId: 'customdeploy_sii_sl_paymentexecution',
         returnExternalUrl: false,
         params: {
           'custscript_custpayment_head_id': recordId,
         }
-      });
-      window.open(output);
+        });
+        location.replace(output);
     }
 
     return {

@@ -3,9 +3,9 @@
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
  */
-define(['N/ui/serverWidget','N/url','N/runtime','N/record', 'N/redirect', 'N/search'],
+define(['N/ui/serverWidget','N/url','N/runtime','N/record', 'N/redirect', 'N/search', 'N/task'],
 
-function(serverWidget,url,runtime,record, redirect, search) {
+function(serverWidget,url,runtime,record, redirect, search, task) {
 
     /**
      * Function definition to be triggered before record is loaded.
@@ -19,17 +19,28 @@ function(serverWidget,url,runtime,record, redirect, search) {
     function beforeLoad(scriptContext) {
     	try{
         if (scriptContext.type === scriptContext.UserEventType.VIEW){
+          var cs_file_id = runtime.getCurrentScript().getParameter("custscript_headview_cs_file");
           var currentRecord = scriptContext.newRecord;
+          var form = scriptContext.form;
           var status = currentRecord.getValue('custrecord_sii_custpayment_status');
           if(status === '1' || status === '5'){
-            var form = scriptContext.form;
             form.addButton({
               id : 'custpage_print_receipt',
               label : '実行',
               functionName: "btnExecutionButton("+currentRecord.id+");" 
             });
-            form.clientScriptFileId = 7896;
           }
+          //"ステータスが「2.自動消込実行中」か「5.削除中」の時、
+          // 「更新」ボタンを追加する。"
+          if(status === '3' || status === '6'){
+            var form = scriptContext.form;
+            form.addButton({
+              id: 'custpage_refresh',
+              label: '更新',
+              functionName: 'btnUpdateButton();'
+            });
+          }
+          form.clientScriptFileId = cs_file_id;
         }
     		if (scriptContext.type === scriptContext.UserEventType.EDIT){
           var currentRecord = scriptContext.newRecord;
@@ -52,8 +63,14 @@ function(serverWidget,url,runtime,record, redirect, search) {
               parameters: {'custscript_custpayment_head_id': currentRecord.id}
             });
           }
-    		    //log.debug('Record: ' + currentRecord.id);
 
+    		  if(status === '3' || status === '4'){
+            redirect.toRecord({
+              type : 'customrecord_sii_custpayment_h',
+              id : currentRecord.id
+            });
+          }
+    		    //log.debug('Record: ' + currentRecord.id);
     		}
             /*if(scriptContext.type === scriptContext.UserEventType.VIEW){
                 var form = scriptContext.form;
@@ -161,6 +178,13 @@ function(serverWidget,url,runtime,record, redirect, search) {
      */
     function afterSubmit(scriptContext) {
       try{
+        var status = currentRecord.getValue('custrecord_sii_custpayment_status');
+        if(status === '1' || status === '5'){
+          log.debug({
+            title: 'afterSubmit',
+            details: status
+          });
+        }
         if (scriptContext.type === scriptContext.UserEventType.VIEW){
           var currentRecord = scriptContext.newRecord;
           var status = currentRecord.getValue('custrecord_sii_custpayment_status');
@@ -170,6 +194,12 @@ function(serverWidget,url,runtime,record, redirect, search) {
               details: status
             });
           }
+          //Scheduled Script call
+          var scriptTask = task.create({taskType: task.TaskType.SCHEDULED_SCRIPT});
+          scriptTask.scriptId = 'customscript_sii_ss_create_journal_custp';
+          scriptTask.deploymentId = 'customdeploy_sii_ss_create_journal_custp';
+          scriptTask.params = {custscript_searchid: 'fromduc'};
+          var scriptTaskId = scriptTask.submit();
         }
       }catch (e){
         log.error('UE afterSubmit :' + e);
