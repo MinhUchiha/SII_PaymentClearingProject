@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
+ *
+ * 入金�?�ッ�?ー画面の更新のリロード専用
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file', 'N/record', 'N/format', 'N/url'],
 
@@ -217,22 +223,6 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
 
     function btnExecutionButton(recordId) {
 
-        var id = record.submitFields({
-            type: 'customrecord_sii_custpayment_h',
-            id: recordId,
-            values: {
-                custrecord_sii_custpayment_status: 3
-            }
-        });
-        var output = url.resolveScript({
-        scriptId: 'customscript_sii_sl_paymentexecution',
-        deploymentId: 'customdeploy_sii_sl_paymentexecution',
-        returnExternalUrl: false,
-        params: {
-          'custscript_custpayment_head_id': recordId,
-        }
-        });
-        location.replace(output);
     }
 
     return {

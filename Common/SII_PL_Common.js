@@ -1,6 +1,12 @@
 /**
  * @NApiVersion 2.0
  * @NScriptType plugintypeimpl
+ *
+ * ‹¤—L‹@”\
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 
 define(function() {

@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
+ *
+ * CSV“Ç‚Ýž‚ñ‚ÅƒŒƒR[ƒh‚É•Û‘¶‚·‚é
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 
 define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime', 'N/format', 'N/redirect', 'N/search'], function(serverWidget, log, https, url, record, runtime, format, redirect, search) {
@@ -130,7 +136,7 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 	function createCustomRecord(arrData, filename){
 		var recCustpaymentHeadId;
 		var userObj = runtime.getCurrentUser();
-		var nowDate = new Date();
+		var nowDate = getNowDateJP();
 		var warekiYear = getWarekiYear();
 		for (var i = arrData.length-1; i >= 0; i--) {
 			if(arrData[i][0] == 8){
@@ -215,6 +221,12 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 			});
 			recCustpaymentHead.setSublistValue({
 				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
+				fieldId: 'custrecord_sii_custpayment_client_half',
+				value: paymentArray[i][7],
+				line: j
+			});
+			recCustpaymentHead.setSublistValue({
+				sublistId: 'recmachcustrecord_sii_custpayment_h_id',
 				fieldId: 'custrecord_sii_custpayment_paymentamo',
 				value: format.parse({value: paymentArray[i][4],type: format.Type.INTEGER}),
 				line: j
@@ -258,6 +270,16 @@ define(['N/ui/serverWidget', 'N/log', 'N/https', 'N/url', 'N/record', 'N/runtime
 			name: 'name'
 		});
 		return( warekiYear );
+	}
+
+	function getNowDateJP(){
+	    var stNow = new Date();
+	    stNow.setMilliseconds((3600000*9));
+	    var stYear = stNow.getUTCFullYear();
+	    var stMonth = stNow.getUTCMonth();
+	    var stDate = stNow.getUTCDate();
+	    stNow = new Date(stYear,stMonth,stDate);
+	    return stNow;
 	}
 
 	/**

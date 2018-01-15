@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
+ *
+ * 入金管理の編集、誤差調整金額画面
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file', 'N/record', 'N/format'],
 
@@ -129,7 +135,7 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 fieldId: 'sub_list_10',
                 line: line
               }).isDisabled = true;
-              setTotal(payment_id, currentRecord);
+              //setTotal(payment_id, currentRecord);
             } else {
               currentRecord.getSublistField({
                 sublistId: 'invoice_sub_list',
@@ -147,32 +153,51 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 line: line
               }).isDisabled = false;
               //「調整額」に入力した数値は「合計」に加算する
-              setTotal(payment_id, currentRecord);
-              var sumappli = 0
-              for(i = 0; i < numLines; i++){
-                var appliedLine = currentRecord.getSublistValue({
-                    sublistId: 'invoice_sub_list',
-                    fieldId: 'sub_list_4',
-                    line: i
-                });
-                if(isEmpty(appliedLine)){
-                  appliedLine = 0;
-                }
-                sumappli += appliedLine;
-              }
-              var total = currentRecord.getValue({
-                fieldId: 'total_text'
-              });
-              total = getInt(total);
-              var applicable_amount =  format.format({
-                  value: total - sumappli,
-                  type: format.Type.INTEGER
-              });
-              currentRecord.setValue({
-                  "fieldId": "applicable_amount",
-                  "value": applicable_amount
-              });
+              //setTotal(payment_id, currentRecord);
             }
+            var total = currentRecord.getValue({
+              fieldId: 'total_text'
+            });
+            total = getInt(total);
+            applicableamount = total;
+            var fee = currentRecord.getValue({
+              fieldId: 'fee'
+            });
+            if(!isEmpty(fee)){
+              applicableamount = applicableamount - fee;
+            }
+            var calculation_error = currentRecord.getValue({
+              fieldId: 'calculation_error'
+            });
+            if(!isEmpty(calculation_error)){
+              applicableamount = applicableamount - calculation_error;
+            }
+            for(i = 0; i < numLines; i++){
+              var applied = currentRecord.getSublistValue({
+                  sublistId: 'invoice_sub_list',
+                  fieldId: 'sub_list_4',
+                  line: i
+              });
+              var ajustmount = currentRecord.getSublistValue({
+                  sublistId: 'invoice_sub_list',
+                  fieldId: 'sub_list_5',
+                  line: i
+              });
+              if(!isEmpty(ajustmount)){
+                applicableamount = applicableamount - ajustmount;
+              }
+              if(!isEmpty(applied)){
+                applicableamount = applicableamount - applied;
+              }
+            }
+            var applicable_amount =  format.format({
+                value: applicableamount,
+                type: format.Type.INTEGER
+            });
+            currentRecord.setValue({
+                "fieldId": "applicable_amount",
+                "value": applicable_amount
+            });
           }
           if(scriptContext.fieldId === 'sub_list_4') {
             var adjustment = currentRecord.getSublistValue({ 
@@ -208,24 +233,43 @@ function(dialog,currentRecord,search,message,file,record,format) {
             currentRecord.commitLine({
                 "sublistId": "invoice_sub_list"
             });
-            var sumappli = 0;
-            for(i = 0; i < numLines; i++){
-                var appliedLine = currentRecord.getSublistValue({
-                    sublistId: 'invoice_sub_list',
-                    fieldId: 'sub_list_4',
-                    line: i
-                });
-                if(isEmpty(appliedLine)){
-                  appliedLine = 0;
-                }
-                sumappli += appliedLine;
-            }
             var total = currentRecord.getValue({
               fieldId: 'total_text'
             });
             total = getInt(total);
+            applicableamount = total;
+            var fee = currentRecord.getValue({
+              fieldId: 'fee'
+            });
+            if(!isEmpty(fee)){
+              applicableamount = applicableamount - fee;
+            }
+            var calculation_error = currentRecord.getValue({
+              fieldId: 'calculation_error'
+            });
+            if(!isEmpty(calculation_error)){
+              applicableamount = applicableamount - calculation_error;
+            }
+            for(i = 0; i < numLines; i++){
+              var applied = currentRecord.getSublistValue({
+                  sublistId: 'invoice_sub_list',
+                  fieldId: 'sub_list_4',
+                  line: i
+              });
+              var ajustmount = currentRecord.getSublistValue({
+                  sublistId: 'invoice_sub_list',
+                  fieldId: 'sub_list_5',
+                  line: i
+              });
+              if(!isEmpty(ajustmount)){
+                applicableamount = applicableamount - ajustmount;
+              }
+              if(!isEmpty(applied)){
+                applicableamount = applicableamount - applied;
+              }
+            }
             var applicable_amount =  format.format({
-                value: total - sumappli,
+                value: applicableamount,
                 type: format.Type.INTEGER
             });
             currentRecord.setValue({
@@ -233,172 +277,131 @@ function(dialog,currentRecord,search,message,file,record,format) {
                 "value": applicable_amount
             });
           }          
-            if(scriptContext.fieldId === 'sub_list_6'){
-                var check = currentRecord.getSublistValue({ 
-                    sublistId: 'invoice_sub_list',
-                    fieldId : 'sub_list_6',
-                    line : line
-                });
-                var fee = currentRecord.getValue({
-                    fieldId: 'fee'
-                });
-                var calculation_error = currentRecord.getValue({
-                    fieldId: 'calculation_error'
-                });
-                var applied = currentRecord.getSublistValue({
-                    sublistId: 'invoice_sub_list',
-                    fieldId: 'sub_list_4',
-                    line: line
-                });
-                var no_applicable = currentRecord.getSublistValue({
-                    "sublistId": "invoice_sub_list",
-                    "fieldId": "sub_list_7",
-                    line: line
-                });
-                if(isEmpty(calculation_error)){
-                    calculation_error = 0;
-                }
-                if(isEmpty(fee)){
-                    fee = 0;
-                }
-                if(check){
-                    for(i = 0; i < numLines; i++){
-                        var checkLine = currentRecord.getSublistValue({ 
-                            sublistId: 'invoice_sub_list',
-                            fieldId : 'sub_list_6',
-                            line : i
-                        });
-                        var appliedLine = currentRecord.getSublistValue({
-                            sublistId: 'invoice_sub_list',
-                            fieldId: 'sub_list_4',
-                            line: i
-                        });
-                        var no_applicableLine = currentRecord.getSublistValue({
-                            "sublistId": "invoice_sub_list",
-                            "fieldId": "sub_list_7",
-                            line: i
-                        });
-                        if(i !== line){
-                            if(checkLine){
-                                currentRecord.selectLine({
-                                    "sublistId": "invoice_sub_list",
-                                    "line": i
-                                });
-                                currentRecord.setCurrentSublistValue({
-                                    "sublistId": "invoice_sub_list",
-                                    "fieldId": "sub_list_4",
-                                    "value": (appliedLine-fee-calculation_error).toString()
-                                });
-                                currentRecord.setCurrentSublistValue({
-                                    "sublistId": "invoice_sub_list",
-                                    "fieldId": "sub_list_7",
-                                    "value": (no_applicableLine+fee+calculation_error).toString()
-                                });
-                                currentRecord.setCurrentSublistValue({
-                                    "sublistId": "invoice_sub_list",
-                                    "fieldId": "sub_list_6",
-                                    "value": false
-                                });
-                                currentRecord.commitLine({
-                                    "sublistId": "invoice_sub_list"
-                                });
-                            }
-                        }
-                    }
-                    currentRecord.selectLine({
-                        "sublistId": "invoice_sub_list",
-                        "line": line
-                    });
-                    currentRecord.setCurrentSublistValue({
-                        "sublistId": "invoice_sub_list",
-                        "fieldId": "sub_list_4",
-                        "value": (fee+calculation_error+applied).toString()
-                    });
-                    currentRecord.setCurrentSublistValue({
-                        "sublistId": "invoice_sub_list",
-                        "fieldId": "sub_list_7",
-                        "value": (no_applicable-fee-calculation_error).toString()
-                    });
-                    currentRecord.commitLine({
-                        "sublistId": "invoice_sub_list"
-                    });
-                }else{
-                    currentRecord.selectLine({
-                        "sublistId": "invoice_sub_list",
-                        "line": line
-                    });
-                    currentRecord.setCurrentSublistValue({
-                        "sublistId": "invoice_sub_list",
-                        "fieldId": "sub_list_4",
-                        "value": (applied-fee-calculation_error).toString()
-                    });
-                    currentRecord.setCurrentSublistValue({
-                        "sublistId": "invoice_sub_list",
-                        "fieldId": "sub_list_7",
-                        "value": (no_applicable+fee+calculation_error).toString()
-                    });
-                    currentRecord.commitLine({
-                        "sublistId": "invoice_sub_list"
-                    });
-                }
-                var sumappli = 0;
-                for(i = 0; i < numLines; i++){
-                    var appliedLine = currentRecord.getSublistValue({
-                        sublistId: 'invoice_sub_list',
-                        fieldId: 'sub_list_4',
-                        line: i
-                    });
-                    if(isEmpty(appliedLine))
-                      appliedLine = 0;
-                    sumappli += appliedLine;
-                }
-                var total = currentRecord.getValue({
-                  fieldId: 'total_text'
-                });
-                total = getInt(total);
-                var applicable_amount =  format.format({
-                    value: total - sumappli,
-                    type: format.Type.INTEGER
-                });
-                currentRecord.setValue({
-                    "fieldId": "applicable_amount",
-                    "value": applicable_amount
-                });
-            }else if(scriptContext.fieldId == 'sub_list_5'){
-                var adjustment = currentRecord.getSublistValue({ 
-                    sublistId: 'invoice_sub_list',
-                    fieldId : 'sub_list_5',
-                    line : line
-                });
-                var amountremaining = currentRecord.getSublistValue({ 
-                    sublistId: 'invoice_sub_list',
-                    fieldId : 'sub_list_3',
-                    line : line
-                });
-                var applied = currentRecord.getSublistValue({
-                    sublistId: 'invoice_sub_list',
-                    fieldId: 'sub_list_4',
-                    line: line
-                });
-                var no_applicable = 0
-                if(isEmpty(adjustment)){
-                    adjustment = 0;
-                }
-                no_applicable = amountremaining - (applied+adjustment);
-                currentRecord.selectLine({
-                    "sublistId": "invoice_sub_list",
-                    "line": line
-                });
-                currentRecord.setCurrentSublistValue({
-                    "sublistId": "invoice_sub_list",
-                    "fieldId": "sub_list_7",
-                    "value": no_applicable.toString()
-                });
-                currentRecord.commitLine({
-                    "sublistId": "invoice_sub_list"
-                });
+          if(scriptContext.fieldId === 'sub_list_6'){
+            var check = currentRecord.getSublistValue({ 
+                sublistId: 'invoice_sub_list',
+                fieldId : 'sub_list_6',
+                line : line
+            });
+            var fee = currentRecord.getValue({
+                fieldId: 'fee'
+            });
+            var calculation_error = currentRecord.getValue({
+                fieldId: 'calculation_error'
+            });
+            var applied = currentRecord.getSublistValue({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_4',
+                line: line
+            });
+            var no_applicable = currentRecord.getSublistValue({
+                "sublistId": "invoice_sub_list",
+                "fieldId": "sub_list_7",
+                line: line
+            });
+            if(isEmpty(calculation_error)){
+                calculation_error = 0;
             }
-        }else{
+            if(isEmpty(fee)){
+                fee = 0;
+            }
+            if(check){
+              for(i = 0; i < numLines; i++){
+                var checkLine = currentRecord.getSublistValue({ 
+                  sublistId: 'invoice_sub_list',
+                  fieldId : 'sub_list_6',
+                  line : i
+                });
+                var appliedLine = currentRecord.getSublistValue({
+                  sublistId: 'invoice_sub_list',
+                  fieldId: 'sub_list_4',
+                  line: i
+                });
+                var no_applicableLine = currentRecord.getSublistValue({
+                  "sublistId": "invoice_sub_list",
+                  "fieldId": "sub_list_7",
+                  line: i
+                });
+                if(i !== line){
+                  if(checkLine){
+                    currentRecord.selectLine({
+                      "sublistId": "invoice_sub_list",
+                      "line": i
+                    });
+                    currentRecord.setCurrentSublistValue({
+                      "sublistId": "invoice_sub_list",
+                      "fieldId": "sub_list_6",
+                      "value": false
+                    });
+                    currentRecord.commitLine({
+                      "sublistId": "invoice_sub_list"
+                    });
+                  }
+                }
+              }
+            }
+          }
+        }
+        if(scriptContext.fieldId == 'fee' || scriptContext.fieldId == 'calculation_error'){
+          var total = currentRecord.getValue({
+            fieldId: 'total_text'
+          });
+          total = getInt(total);
+          applicableamount = total;
+          var fee = currentRecord.getValue({
+            fieldId: 'fee'
+          });
+          if(!isEmpty(fee)){
+            applicableamount = applicableamount - fee;
+          }
+          var calculation_error = currentRecord.getValue({
+            fieldId: 'calculation_error'
+          });
+          if(!isEmpty(calculation_error)){
+            applicableamount = applicableamount - calculation_error;
+          }
+          for(i = 0; i < numLines; i++){
+            var ajustmount = currentRecord.getSublistValue({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_5',
+                line: i
+            });
+            var check = currentRecord.getSublistValue({ 
+                sublistId: 'invoice_sub_list',
+                fieldId : 'sub_list_6',
+                line : i
+            });
+            var applied = currentRecord.getSublistValue({
+                sublistId: 'invoice_sub_list',
+                fieldId: 'sub_list_4',
+                line: i
+            });
+            var no_applicable = currentRecord.getSublistValue({
+                "sublistId": "invoice_sub_list",
+                "fieldId": "sub_list_7",
+                line: i
+            });
+            if(isEmpty(calculation_error)){
+              calculation_error = 0;
+            }
+            if(isEmpty(fee)){
+              fee = 0;
+            }
+            if(!isEmpty(applied)){
+              applicableamount = applicableamount - applied;
+            }
+            if(!isEmpty(ajustmount)){
+              applicableamount = applicableamount - ajustmount;
+            }
+          }
+          var applicable_amount =  format.format({
+            value: applicableamount,
+            type: format.Type.INTEGER
+          });
+          currentRecord.setValue({
+            "fieldId": "applicable_amount",
+            "value": applicable_amount
+          });
         }
     }
 

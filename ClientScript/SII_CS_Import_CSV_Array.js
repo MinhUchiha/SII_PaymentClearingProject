@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
+ *
+ * CSVインポートのインプットフィルドチェック
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file'],
 

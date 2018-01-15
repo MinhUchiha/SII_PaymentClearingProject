@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType UserEventScript
  * @NModuleScope SameAccount
+ *
+ * 入金ヘッダーの画面ロードの処理
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/serverWidget','N/url','N/runtime','N/record', 'N/redirect', 'N/search', 'N/task'],
 
@@ -19,27 +25,18 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
     function beforeLoad(scriptContext) {
     	try{
         if (scriptContext.type === scriptContext.UserEventType.VIEW){
-          var cs_file_id = runtime.getCurrentScript().getParameter("custscript_headview_cs_file");
-          var currentRecord = scriptContext.newRecord;
-          var form = scriptContext.form;
-          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
-          if(status === '1' || status === '5'){
-            form.addButton({
-              id : 'custpage_print_receipt',
-              label : '実行',
-              functionName: "btnExecutionButton("+currentRecord.id+");" 
-            });
-          }
-          //"ステータスが「2.自動消込実行中」か「5.削除中」の時、
-          // 「更新」ボタンを追加する。"
-          if(status === '3' || status === '6'){
-            var form = scriptContext.form;
+        	//ステータスに関係なく「更新ボタンを表示する」
+        	var form = scriptContext.form;
             form.addButton({
               id: 'custpage_refresh',
               label: '更新',
               functionName: 'btnUpdateButton();'
             });
-          }
+            
+          var cs_file_id = runtime.getCurrentScript().getParameter("custscript_headview_cs_file");
+          var currentRecord = scriptContext.newRecord;
+          var form = scriptContext.form;
+          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
           form.clientScriptFileId = cs_file_id;
         }
     		if (scriptContext.type === scriptContext.UserEventType.EDIT){
@@ -78,7 +75,7 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
                 form.addButton({
                     id : 'custpage_print_receipt',
                     label : '実行',
-                    functionName: "window.history.go(-1);" 
+                    functionName: "window.history.go(-1);"
                 });
             }*/
     	}catch(e){
@@ -104,39 +101,19 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
                     sublistId: 'recmachcustrecord_sii_custpayment_h_id'
                 });
                 for(var i = 0; i < numLines; i++){
-                    var bank = currentRecord.getSublistValue({
+                    var client_half = currentRecord.getSublistValue({
                         sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                        fieldId: 'custrecord_sii_custpayment_bank',
+                        fieldId: 'custrecord_sii_custpayment_client_half',
                         line: i
                     });
-                    bank = bank.replace(/\s/g, '');
-                    bank = convertKanaToOneByte(bank);
-                    var branchname = currentRecord.getSublistValue({
-                        sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                        fieldId: 'custrecord_sii_custpayment_branchoff',
-                        line: i
-                    });
-                    branchname = branchname.replace(/\s/g, '');
-                    branchname = convertKanaToOneByte(branchname);
-                    var request = currentRecord.getSublistValue({
-                        sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                        fieldId: 'custrecord_sii_custpayment_request',
-                        line: i
-                    });
-                    request = request.replace(/\s/g, '');
-                    request = convertKanaToOneByte(request);
+                    client_half = client_half.replace(/\s/g, '');
+                    client_half = convertKanaToOneByte(client_half);
                     for(var m =0; m < customerArray.length; m++){
-                        var custbankname = customerArray[m].getValue({name: 'custentity_sii_custpayment_bankname'});
-                        custbankname = custbankname.replace(/\s/g, '');
-                        custbankname = convertKanaToOneByte(custbankname);
-                        var custbranchname = customerArray[m].getValue({name: 'custentity_sii_custpayment_branchname'});
-                        custbranchname = custbranchname.replace(/\s/g, '');
-                        custbranchname = convertKanaToOneByte(custbranchname);
-                        var custclientname = customerArray[m].getValue({name: 'custentity_sii_custpayment_clientname'});
-                        custclientname = custclientname.replace(/\s/g, '');
-                        custclientname = convertKanaToOneByte(custclientname);
+                        var hankakukana_name = customerArray[m].getValue({name: 'custentity_hankakukana_name'});
+                        hankakukana_name = hankakukana_name.replace(/\s/g, '');
+                        hankakukana_name = convertKanaToOneByte(hankakukana_name);
                         var entityid = customerArray[m].getValue({name: 'entityid'});
-                        if(custbankname == bank && custbranchname == branchname && custclientname == request ){
+                        if(hankakukana_name ==  client_half){
                             currentRecord.setSublistValue({
                                 sublistId: 'recmachcustrecord_sii_custpayment_h_id',
                                 fieldId: 'custrecord_sii_custpayment_customerno',
@@ -149,24 +126,18 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
                                 value: customerArray[m].id,
                                 line: i
                             });
-                            currentRecord.setSublistValue({
-                                sublistId: 'recmachcustrecord_sii_custpayment_h_id',
-                                fieldId: 'custrecord_sii_custpayment_client_half',
-                                value: customerArray[m].getValue({name: 'custentity_hankakukana_name'}),
-                                line: i
-                            });
                             break;
-                        } 
+                        }
                     }
                 }
                 var scriptObj = runtime.getCurrentScript();
-                log.debug("Remaining governance units: " + scriptObj.getRemainingUsage());
+                log.audit("Remaining governance units: " + scriptObj.getRemainingUsage());
             }
         }catch(e){
             log.error('UE: ' + e);
         }
     }
-    
+
     /**
      * Function definition to be triggered before record is loaded.
      *
@@ -178,27 +149,20 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
      */
     function afterSubmit(scriptContext) {
       try{
+        var currentRecord = scriptContext.newRecord;
         var status = currentRecord.getValue('custrecord_sii_custpayment_status');
+        log.audit({
+          title: 'afterSubmit audit',
+          details: status
+        });
         if(status === '1' || status === '5'){
-          log.debug({
-            title: 'afterSubmit',
-            details: status
-          });
         }
-        if (scriptContext.type === scriptContext.UserEventType.VIEW){
-          var currentRecord = scriptContext.newRecord;
-          var status = currentRecord.getValue('custrecord_sii_custpayment_status');
-          if(status === '1' || status === '5'){
-            log.debug({
-              title: 'afterSubmit',
-              details: status
-            });
-          }
+        if(status === '3'){
           //Scheduled Script call
           var scriptTask = task.create({taskType: task.TaskType.SCHEDULED_SCRIPT});
           scriptTask.scriptId = 'customscript_sii_ss_create_journal_custp';
           scriptTask.deploymentId = 'customdeploy_sii_ss_create_journal_custp';
-          scriptTask.params = {custscript_searchid: 'fromduc'};
+          scriptTask.params = {custscripthead_id: currentRecord.id};
           var scriptTaskId = scriptTask.submit();
         }
       }catch (e){
@@ -212,12 +176,6 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
             type: search.Type.CUSTOMER,
             columns: [{
                 name: 'entityid'
-            }, {
-                name: 'custentity_sii_custpayment_bankname'
-            }, {
-                name: 'custentity_sii_custpayment_branchname'
-            }, {
-                name: 'custentity_sii_custpayment_clientname'
             }, {
                 name: 'custentity_hankakukana_name'
             }]
@@ -264,7 +222,7 @@ function(serverWidget,url,runtime,record, redirect, search, task) {
         'ｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾊﾋﾌﾍﾎ',
         'ガギグゲゴザジズゼゾダヂヅデドバビブベボ'
     );*/
-      
+
     // 全角から半角への変換用マップ
     var p = createKanaMap(
         'パピプペポ',

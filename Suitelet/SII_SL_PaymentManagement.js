@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType Suitelet
  * @NModuleScope SameAccount
+ *
+ * 入金管理票画面、入金ヘッダーに保存
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/serverWidget','N/http','N/record','N/search','N/redirect','N/format', 'N/runtime', 'N/url'],
 
@@ -88,7 +94,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 form.addButton({
                     id: 'cancelButton',
                     label: 'キャンセル',
-                    functionName: 'window.history.go(-1);'
+                    functionName: 'btnClearButton('+recordId+');'
                 });
                 //入金管理票から「実行」ボタンを削除する。代わりに、「更新」ボタンを追加する。
                 form.addButton({
@@ -118,7 +124,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     displayType: serverWidget.FieldDisplayType.DISABLED
                 });
                 
-                var paymentDateFrom = form.addField({
+                /*var paymentDateFrom = form.addField({
                     id: 'paymentdatefrom',
                     label: '入金日 (FROM)',
                     type: serverWidget.FieldType.DATE
@@ -130,7 +136,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     label: '入金日 (TO)',
                     type: serverWidget.FieldType.DATE
                 });
-                paymentDateTo.defaultValue = toDate;
+                paymentDateTo.defaultValue = toDate;*/
 
                 var textStatus = form.addField({
                     id: 'textstatus',
@@ -206,7 +212,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'sub_list_2',
                     type: serverWidget.FieldType.TEXT,
                     label: '得意先No.'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 var customerSelect = paymentSubList.addField({
                     id: 'sub_list_3',
                     type: serverWidget.FieldType.SELECT,
@@ -217,7 +223,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'client_half',
                     type: serverWidget.FieldType.TEXT,
                     label: '半角カナ社名'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 paymentSubList.addField({
                     id: 'sub_list_4',
                     type: serverWidget.FieldType.DATE,
@@ -245,9 +251,9 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                 });
                 paymentSubList.addField({
                     id: 'sub_list_9',
-                    type: serverWidget.FieldType.CURRENCY,
+                    type: serverWidget.FieldType.TEXT,
                     label: '債権合計'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.ENTRY});
                 paymentSubList.addField({
                     id: 'feeid',
                     type: serverWidget.FieldType.TEXT,
@@ -258,17 +264,17 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     id: 'sub_list_10',
                     type: serverWidget.FieldType.CHECKBOX,
                     label: '一致'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.DISABLED});
                 paymentSubList.addField({
                     id: 'sub_list_11',
                     type: serverWidget.FieldType.CHECKBOX,
                     label: '消費税'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.DISABLED});
                 paymentSubList.addField({
                     id: 'sub_list_12',
                     type: serverWidget.FieldType.CHECKBOX,
                     label: '手数料'
-                });
+                }).updateDisplayType({displayType : serverWidget.FieldDisplayType.DISABLED});
                 paymentSubList.addField({
                     id: 'sub_list_13',
                     type: serverWidget.FieldType.TEXT,
@@ -308,9 +314,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     var paymentamo = result.getValue({
                         name: 'custrecord_sii_custpayment_paymentamo'
                     });
-                    var claimsum = result.getValue({
-                        name: 'custrecord_sii_custpayment_claimsum'
-                    });
+                    var claimsum = 0;
                     var client_half = result.getValue({
                         name: 'custrecord_sii_custpayment_client_half'
                     });
@@ -385,9 +389,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                             line: i,
                             value: 'F'
                         });
-                        if(checkDate(paymentdate, fromDate, toDate)){
-                            totalamount += parseInt(paymentamo);
-                        }
+                        totalamount += parseInt(paymentamo);
                     }
                     var output = url.resolveScript({
                         scriptId: 'customscript_sii_sl_paymentadjustment',
@@ -474,13 +476,17 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                         paymentSubList.setSublistValue({
                             id: 'sub_list_9',
                             line: i,
-                            value: 0
+                            value: '0'
                     });
                     }else{
+                        var claimsumText = format.format({
+                            value: claimsum,
+                            type: format.Type.INTEGER
+                        });
                         paymentSubList.setSublistValue({
                             id: 'sub_list_9',
                             line: i,
-                            value: claimsum
+                            value: claimsumText
                         });
                     }
                     if(match){
@@ -795,7 +801,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                     type: 'customrecord_sii_custpayment_h',
                     id: id
                 });
-                var dateFrom = context.request.parameters.paymentdatefrom;
+                /*var dateFrom = context.request.parameters.paymentdatefrom;
                 if(!isEmpty(dateFrom)){
                     dateFrom = format.parse({
                         value: dateFrom,
@@ -818,7 +824,7 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                         fieldId: 'custrecord_sii_custpayment_date_to',
                         value: dateTo
                     });
-                }
+                }*/
                 saveRecord.setValue({
                     fieldId: 'custrecord_sii_custpayment_amountsum',
                     value: getInt(texttotal)
@@ -860,133 +866,70 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
                         name: 'sub_list_check',
                         line: i
                     });
-                    record.submitFields({
-                        type: 'customrecord_sii_custpayment',
-                        id: paymentId,
-                        values: {
-                            custrecord_sii_custpayment_exclusion: check
+                    var customer = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'sub_list_3',
+                        line: i
+                    });
+                    var match = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'sub_list_10',
+                        line: i
+                    });
+                    var consumption = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'sub_list_11',
+                        line: i
+                    });
+                    var fee = context.request.getSublistValue({
+                        group: 'payment_sub_list',
+                        name: 'sub_list_12',
+                        line: i
+                    });
+                    if(!isEmpty(customer) && customer != 0){
+                        var totalReceivables = context.request.getSublistValue({
+                            group: 'payment_sub_list',
+                            name: 'sub_list_9',
+                            line: i
+                        });
+                        if(totalReceivables != '' || totalReceivables != null){
+                            totalReceivables = getInt(totalReceivables);
+                        }else{
+                            totalReceivables = 0
                         }
-                    });
-                }
-                /*if(aracct!= null && aracct!= ''){
-                    var customerPaymentRecord = record.transform({
-                        fromType: 'invoice',
-                        fromId: invoidRecordID,
-                        toType: 'customerpayment'
-                    });
-                    var customerPaymentRecord = record.create({
-                        type: 'customerpayment'
-                    });
-                    customerPaymentRecord.setValue({
-                        fieldId: 'currency',
-                        value: 1
-                    });
-                    customerPaymentRecord.setValue({
-                        fieldId: 'exchangerate',
-                        value: 1
-                    });
-                    customerPaymentRecord.setValue({
-                        fieldId: 'payment',
-                        value: 3430332   
-                    });
-                    customerPaymentRecord.setValue({
-                        fieldId: 'aracct',
-                        value: aracct
-                    });
-                    customerPaymentRecord.setValue({
-                        fieldId: 'trandate',
-                        value: nowDate
-                    });
-                    customerPaymentRecord.setSublistValue({
-                        sublistId: 'apply',
-                        fieldId: 'apply',
-                        line: 0,
-                        value: true
-                    });
-                    customerPaymentRecord.setSublistValue({
-                        sublistId: 'apply ',
-                        fieldId: 'amount',
-                        line: 0,
-                        value: 10000
-                    });
-                    customerPaymentRecord.setSublistValue({
-                        sublistId: 'apply',
-                        fieldId: 'applydate',
-                        line: 0,
-                        value: nowDate
-                    });
-                    customerPaymentRecord.save();
-                }
-                if(fee == 'T'){
-                    var newJournalRecord = record.create({
-                        type: 'journalentry'
-                    });
-                    var numLines = newJournalRecord.getLineCount({
-                        sublistId: 'line'
-                    });
-                    var custfee = record.load({
-                        type: 'customrecord_sii_custfee',
-                        id: feeid
-                    });
-                    var custfee_base = custfee.getValue({
-                        fieldId: 'custrecord_sii_custfee_base'
-                    });
-                    var custfee_tax = custfee.getValue({
-                        fieldId: 'custrecord_sii_custfee_tax'
-                    })
-                    newJournalRecord.setSublistValue({
-                        sublistId: 'line',
-                        fieldId: 'account',
-                        line: 0,
-                        value: fee_account_item
-                    });
-                    newJournalRecord.setSublistValue({
-                        sublistId: 'line',
-                        fieldId: 'debit',
-                        line: 0,
-                        value: 3430332
-                    });
-                    newJournalRecord.setSublistValue({
-                        sublistId: 'line',
-                        fieldId: 'linetaxcode',
-                        line: 0,
-                        value: tax_code
-                    });
-                    newJournalRecord.setSublistValue({
-                        sublistId: 'line',
-                        fieldId: 'account',
-                        line: 1,
-                        value: fee_account_item
-                    });
-                    newJournalRecord.setSublistValue({
-                        sublistId: 'line',
-                        fieldId: 'credit',
-                        line: 1,
-                        value: 3430332
-                    });
-                    newJournalRecord.save();
-                }
-                var invoiceList = getInvoiceList();
-                var aracct;
-                var invoidRecordID;
-                invoiceList.each(function(result) {
-                    var invoiceCustomer = result.getValue(invoiceList.columns[0]);
-                    var tranid = result.getValue(invoiceList.columns[2]);
-                    var duedate = result.getValue(invoiceList.columns[7]);
-                    var amount = result.getValue(invoiceList.columns[3]);
-                    var amountremaining = result.getValue(invoiceList.columns[4]);
-                    var department = result.getText(invoiceList.columns[6]);
-                    var entity = result.getValue(invoiceList.columns[8]);
-                    if(invoiceCustomer == customer ){
-                        aracct = entity;
-                        invoidRecordID = result.id;
+                        customerRecord = record.load({
+                            type: 'customer',
+                            id: customer
+                        });
+                        var hankakukanaName = customerRecord.getValue({fieldId: 'custentity_hankakukana_name'});
+                        var entityid = customerRecord.getValue({fieldId: 'entityid'});
+                        record.submitFields({
+                            type: 'customrecord_sii_custpayment',
+                            id: paymentId,
+                            values: {
+                                custrecord_sii_custpayment_exclusion: check,
+                                custrecord_sii_custpayment_client: customer,
+                                custrecord_sii_custpayment_client_half: hankakukanaName,
+                                custrecord_sii_custpayment_claimsum: totalReceivables,
+                                custrecord_sii_custpayment_customerno: entityid.split(" ")[0],
+                                custrecord_sii_custpayment_match: match,
+                                custrecord_sii_custpayment_consumption: consumption,
+                                custrecord_sii_custpayment_fee: fee
+                            }
+                        });
+                    }else{
+                        record.submitFields({
+                            type: 'customrecord_sii_custpayment',
+                            id: paymentId,
+                            values: {
+                                custrecord_sii_custpayment_exclusion: check,
+                                custrecord_sii_custpayment_match: match,
+                                custrecord_sii_custpayment_consumption: consumption,
+                                custrecord_sii_custpayment_fee: fee
+                            }
+                        });
                     }
-                    return true;
-                });
-                log.debug({
-                    title: 'aracct',
-                    details: customer+" "+aracct+invoiceList.columns[8].name
-                })*/
+                }
                 redirect.toRecord({
                     type : 'customrecord_sii_custpayment_h',
                     id : id
@@ -1075,6 +1018,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         return( resultSet );
     }
 
+    /*****
+    *Change StringNumber to Integer.
+    *Example: getInt(123,230,112) -> return 123230112 
+    *@param {String} stringNumber
+    *
+    *return {Int}
+    *
+    ***/
     function getInt(stringNumber){
         stringNumber = stringNumber.split(",");
         var stringtotal = '';
@@ -1106,36 +1057,14 @@ function(serverWidget, http, record, search, redirect, format, runtime, url) {
         return( resultSet );
     }
 
-    function checkDate(paymentDate, fromDate, toDate){
-        if(!isEmpty(fromDate)){
-            if(!isEmpty(toDate)){
-                if(paymentDate >= fromDate && paymentDate <= toDate){
-                    return true;
-                }else{
-                    return false;
-                }
-            }else{
-                if(paymentDate >= fromDate){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
-        }else{
-            if(!isEmpty(toDate)){
-                if(paymentDate <= toDate){
-                    return true;
-                }else{
-                    return false;
-                }
-            }else{
-                if(paymentDate >= fromDate){
-                    return true;
-                }else{
-                    return false;
-                }
-            }
-        }
+    function getNowDateJP(){
+        var stNow = new Date();
+        stNow.setMilliseconds((3600000*9));
+        var stYear = stNow.getUTCFullYear();
+        var stMonth = stNow.getUTCMonth();
+        var stDate = stNow.getUTCDate();
+        stNow = new Date(stYear,stMonth,stDate);
+        return stNow;
     }
 
     function isEmpty(stValue) {

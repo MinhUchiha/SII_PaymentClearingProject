@@ -2,6 +2,12 @@
  * @NApiVersion 2.x
  * @NScriptType ClientScript
  * @NModuleScope SameAccount
+ *
+ * ì¸ã‡ä«óùï[
+ *
+ * Version    Date            Author           Remarks
+ * 1.00       2018/01/09      Astop            Initial
+ *
  */
 define(['N/ui/dialog', 'N/currentRecord','N/search', 'N/ui/message', 'N/file', 'N/record', 'N/format', 'N/url'],
 
@@ -22,11 +28,26 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             sublistId: 'payment_sub_list'
         });
         for (i = 0; i < numLines; i++) {
-            check = currentRecord.getSublistValue({ 
+            var check = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId : 'sub_list_check',
                 line : i 
             });
+            currentRecord.getSublistField({ 
+                sublistId: 'payment_sub_list',
+                fieldId : 'sub_list_2',
+                line : i 
+            }).isDisabled = true;
+            currentRecord.getSublistField({ 
+                sublistId: 'payment_sub_list',
+                fieldId : 'client_half',
+                line : i 
+            }).isDisabled = true;
+            currentRecord.getSublistField({ 
+                sublistId: 'payment_sub_list',
+                fieldId : 'sub_list_9',
+                line : i 
+            }).isDisabled = true;
             if(check){
                 var matchField = currentRecord.getSublistField({ 
                     sublistId: 'payment_sub_list',
@@ -68,13 +89,8 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             fieldId : 'head_id'
         });
         var line = scriptContext.line;
-        var formDate = currentRecord.getValue({
-            fieldId: 'paymentdatefrom'
-        });
-        var toDate = currentRecord.getValue({
-            fieldId: 'paymentdateto'
-        });
-        if(line != null){
+        var fieldId = scriptContext.fieldId;
+        if(scriptContext.fieldId === 'sub_list_check' || scriptContext.fieldId === 'sub_list_10' || scriptContext.fieldId === 'sub_list_11' || scriptContext.fieldId === 'sub_list_12'){
             //èú
             var check = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
@@ -86,7 +102,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             });
             totalvalue = getInt(totalvalue);
             //ì¸ã‡î‘çÜ
-            var id = currentRecord.getSublistValue({
+            var paymentid = currentRecord.getSublistValue({
                 sublistId: 'payment_sub_list',
                 fieldId: 'id',
                 line: line
@@ -95,12 +111,6 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
             var paymentDate = currentRecord.getSublistValue({ 
                 sublistId: 'payment_sub_list',
                 fieldId : 'sub_list_4',
-                line : line 
-            });
-            //
-            var id = currentRecord.getSublistValue({
-                sublistId: 'payment_sub_list',
-                fieldId : 'id',
                 line : line 
             });
             //ìæà”êÊNO.
@@ -128,6 +138,21 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                 line: line
             });
 
+            var savingString = {
+                'check':check,
+                'client':client,
+                'match':match,
+                'consumption':consumption,
+                'fee':fee
+            };
+            record.submitFields({
+                type: 'customrecord_sii_custpayment',
+                id: paymentid,
+                values: {
+                    custrecord_sii_custpayment_saving: JSON.stringify(savingString)
+                }
+            });
+
             if(check){
                 var matchField = currentRecord.getSublistField({ 
                     sublistId: 'payment_sub_list',
@@ -152,9 +177,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                     fieldId: 'sub_list_8',
                     line: line
                 });
-                if(checkDate(paymentDate, formDate, toDate)){
-                    totalvalue = totalvalue - amount;
-                }
+                totalvalue = totalvalue - amount;
                 totalvalue = format.format({
                     value: totalvalue,
                     type: format.Type.INTEGER
@@ -187,60 +210,7 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
                     fieldId: 'sub_list_8',
                     line: line
                 });
-                if(checkDate(paymentDate, formDate, toDate)){
-                    totalvalue = totalvalue + amount;
-                }
-                totalvalue = format.format({
-                    value: totalvalue,
-                    type: format.Type.INTEGER
-                });
-                currentRecord.setValue({
-                    fieldId: 'texttotal',
-                    value: totalvalue
-                });
-            }
-            var savingString = {
-                'check':check,
-                'client':client,
-                'match':match,
-                'consumption':consumption,
-                'fee':fee
-            };
-
-            var id = record.submitFields({
-                type: 'customrecord_sii_custpayment',
-                id: id,
-                values: {
-                    custrecord_sii_custpayment_saving: JSON.stringify(savingString)
-                }
-            });
-        }else{
-            var fieldId = scriptContext.fieldId;
-            if(fieldId == 'paymentdatefrom' || fieldId == 'paymentdateto'){
-                var numLines = currentRecord.getLineCount({
-                    sublistId: 'payment_sub_list'
-                });
-                totalvalue = 0;
-                for (i = 0; i < numLines; i++) {
-                    var amount = currentRecord.getSublistValue({
-                        sublistId: 'payment_sub_list',
-                        fieldId: 'sub_list_8',
-                        line: i
-                    });
-                    var paymentDate = currentRecord.getSublistValue({ 
-                        sublistId: 'payment_sub_list',
-                        fieldId : 'sub_list_4',
-                        line : i 
-                    });
-                    var check = currentRecord.getSublistValue({ 
-                        sublistId: 'payment_sub_list',
-                        fieldId : 'sub_list_check',
-                        line : i
-                    });
-                    if(checkDate(paymentDate, formDate, toDate) && !check){
-                        totalvalue += amount
-                    }
-                }
+                totalvalue = totalvalue + amount;
                 totalvalue = format.format({
                     value: totalvalue,
                     type: format.Type.INTEGER
@@ -318,6 +288,133 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
       //       alert('ok clicked');
       //     }
       // }
+      if(fieldId == 'sub_list_3'){
+        //ì¸ã‡î‘çÜ
+        var paymentid = currentRecord.getSublistValue({
+            sublistId: 'payment_sub_list',
+            fieldId: 'id',
+            line: line
+        });
+        //èú
+        var check = currentRecord.getSublistValue({ 
+            sublistId: 'payment_sub_list',
+            fieldId : 'sub_list_check',
+            line : line
+        });
+        var customerId = currentRecord.getSublistValue({ 
+          sublistId: 'payment_sub_list',
+          fieldId: 'sub_list_3',
+          line: line 
+        });
+        //àÍív
+        var match = currentRecord.getSublistValue({ 
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_10',
+            line: line 
+        });
+        //è¡îÔê≈
+        var consumption = currentRecord.getSublistValue({ 
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_11',
+            line: line 
+        });
+        //éËêîóø
+        var fee = currentRecord.getSublistValue({ 
+            sublistId: 'payment_sub_list',
+            fieldId: 'sub_list_12',
+            line: line
+        });
+        if(customerId != '' && customerId != null){
+          var invoiceList = getInvoice();
+          var claimsum = 0;
+          invoiceList.each(function(result) {
+            entity = result.getValue(invoiceList.columns[0]);
+            amount = result.getValue(invoiceList.columns[1]);
+            if(entity == customerId){
+              claimsum = parseInt(amount);
+              return false;
+            }
+            return true;
+          });
+          customerRecord = record.load({
+            type: 'customer',
+            id: customerId
+          });
+          var hankakukanaName = customerRecord.getValue({fieldId: 'custentity_hankakukana_name'});
+          var entityid = customerRecord.getValue({fieldId: 'entityid'});
+          var lineNumber = currentRecord.selectLine({
+            "sublistId": "payment_sub_list",
+            "line": line
+          });
+          var claimsumText = format.format({
+            value: claimsum,
+            type: format.Type.INTEGER
+          });
+          currentRecord.setCurrentSublistValue({
+              "sublistId": "payment_sub_list",
+              "fieldId": "sub_list_9",
+              "value": claimsumText
+          });
+          currentRecord.setCurrentSublistValue({
+              "sublistId": "payment_sub_list",
+              "fieldId": "sub_list_2",
+              "value": entityid.split(" ")[0]
+          });
+          currentRecord.setCurrentSublistValue({
+              "sublistId": "payment_sub_list",
+              "fieldId": "client_half",
+              "value": hankakukanaName
+          });
+          currentRecord.commitLine({
+              "sublistId": "payment_sub_list"
+          });
+        }else{
+          var lineNumber = currentRecord.selectLine({
+            "sublistId": "payment_sub_list",
+            "line": line
+          });
+          currentRecord.setCurrentSublistValue({
+              "sublistId": "payment_sub_list",
+              "fieldId": "sub_list_9",
+              "value": '0'
+          });
+          currentRecord.setCurrentSublistValue({
+              "sublistId": "payment_sub_list",
+              "fieldId": "sub_list_2",
+              "value": ''
+          });
+          currentRecord.setCurrentSublistValue({
+            "sublistId": "payment_sub_list",
+            "fieldId": "client_half",
+            "value": ''
+          });
+          currentRecord.commitLine({
+            "sublistId": "payment_sub_list"
+          });
+        }
+        var savingString = {
+            'check':check,
+            'client':customerId,
+            'match':match,
+            'consumption':consumption,
+            'fee':fee
+        };
+        record.submitFields({
+            type: 'customrecord_sii_custpayment',
+            id: paymentid,
+            values: {
+                custrecord_sii_custpayment_saving: JSON.stringify(savingString)
+            }
+        });
+      }
+    }
+
+    function getInvoice(){
+        var mysearch = search.load({
+            id: 'customsearch_sii_custpayment_invoice'
+        });
+        var resultSet = mysearch.run();
+        return( resultSet );
     }
 
     function checkDate(paymentDate, fromDate, toDate){
@@ -484,16 +581,17 @@ function(dialog,currentRecord,search,message,file,record,format,url) {
     }
 
     function btnClearButton(stringParam) {
-//    	dialog.alert({
-//  			message: stringParam
-//  		});
-    	
+      var output = url.resolveRecord({
+            recordType: 'customrecord_sii_custpayment_h',
+            recordId: stringParam
+        });
+        window.open(output,"_self");
     }
     function btnSearchButton() {
     	
     }
     function btnReturnButton() {
-    	
+    	window.history.go(-1);
     }
 
     function btnUpdateButton(recordId) {
